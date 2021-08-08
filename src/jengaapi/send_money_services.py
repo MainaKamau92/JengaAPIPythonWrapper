@@ -3,7 +3,7 @@ from datetime import date
 
 import requests
 
-from src.jengaapi import API, UAT_BASE_URL, COUNTRY_CODE, ACCOUNT_NO
+from src.jengaapi import API, BASE_URL, COUNTRY_CODE, ACCOUNT_NO
 from src.jengaapi.exceptions import handle_response, generate_reference
 
 
@@ -44,7 +44,7 @@ class SendMoneyService:
 
     @staticmethod
     def _send_request(headers, payload):
-        url = UAT_BASE_URL + f'transaction/v2/remittance'
+        url = BASE_URL + f'transaction/v2/remittance'
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response

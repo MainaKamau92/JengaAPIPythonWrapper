@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from src.jengaapi import API, UAT_BASE_URL
+from src.jengaapi import API, BASE_URL
 from src.jengaapi.exceptions import handle_response
 
 
@@ -15,7 +15,7 @@ class SendMoneyQueriesServices:
         }
 
     def account_inquiry(self, mobile_number):
-        url = UAT_BASE_URL + 'transaction/v2/pesalink/inquire'
+        url = BASE_URL + 'transaction/v2/pesalink/inquire'
         payload = {
             "mobileNumber": mobile_number
         }
@@ -24,7 +24,7 @@ class SendMoneyQueriesServices:
         return formatted_response
 
     def transaction_status(self, request_id, destination_type, transfer_date):
-        url = UAT_BASE_URL + 'transaction/v2/b2c/status/query'
+        url = BASE_URL + 'transaction/v2/b2c/status/query'
         payload = {
             "requestId": request_id,
             "destination": {

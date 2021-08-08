@@ -7,21 +7,21 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 from src.jengaapi.exceptions import handle_response
-from src.jengaapi.utils import get_project_root
+from src.utils import get_project_root
 
 
 class JengaAPI:
-    def __init__(self, api_key, password, merchant_code, uat_url):
+    def __init__(self, api_key, password, merchant_code, base_url):
         self.api_key = api_key
         self._username = merchant_code
         self._password = password
-        self.uat_url = uat_url
+        self.base_url = base_url
         self.private_key = os.path.join(get_project_root(), "privatekey.pem")
         self.merchant_code = merchant_code
 
     @property
     def authorization_token(self):
-        url = self.uat_url + "/identity/v2/token"
+        url = self.base_url + "/identity/v2/token"
         headers = {"Authorization": self.api_key}
         body = dict(username=self._username, password=self._password)
         response = requests.post(url, headers=headers, data=body)

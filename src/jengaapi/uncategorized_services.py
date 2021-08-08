@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from src.jengaapi import API, COUNTRY_CODE, UAT_BASE_URL, MERCHANT_CODE
+from src.jengaapi import API, COUNTRY_CODE, BASE_URL, MERCHANT_CODE
 from src.jengaapi.exceptions import generate_reference, handle_response
 
 
@@ -32,7 +32,7 @@ class UncategorizedServices:
                 "telco": telco
             }
         }
-        url = UAT_BASE_URL + f'transaction/v2/airtime'
+        url = BASE_URL + f'transaction/v2/airtime'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response
@@ -42,7 +42,7 @@ class UncategorizedServices:
             "countryCode": self.country_code,
             "currencyCode": self.currency_code
         }
-        url = UAT_BASE_URL + f'transaction/v2/foreignexchangerates'
+        url = BASE_URL + f'transaction/v2/foreignexchangerates'
 
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
@@ -65,7 +65,7 @@ class UncategorizedServices:
                 "countryCode": self.country_code
             }
         }
-        url = UAT_BASE_URL + f'customer/v2/identity/verify'
+        url = BASE_URL + f'customer/v2/identity/verify'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response

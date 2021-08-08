@@ -2,7 +2,8 @@ import json
 
 import requests
 
-from src.jengaapi import API, MERCHANT_CODE, COUNTRY_CODE, UAT_BASE_URL, PARTNER_ID
+from src.jengaapi import API, MERCHANT_CODE, COUNTRY_CODE, BASE_URL, PARTNER_ID, BILLER_CODE, PAYER_NAME, \
+    PAYER_ACCOUNT
 from src.jengaapi.exceptions import generate_reference, handle_response
 
 
@@ -18,6 +19,10 @@ class ReceiveMoneyService:
         self.country_code = country_code or COUNTRY_CODE
         self.description = description
         self.currency_code = currency_code
+        self.partner_id = PARTNER_ID
+        self.biller_code = BILLER_CODE
+        self.payer_name = PAYER_NAME
+        self.payer_account = PAYER_ACCOUNT
 
     def receive_payments_eazzypay_push(self, mobile_number):
         signature = API.signature((self.reference_no, self.payment_amount,
@@ -35,16 +40,17 @@ class ReceiveMoneyService:
                 "reference": self.reference_no
             }
         }
-        url = UAT_BASE_URL + 'transaction/v2/payments'
+        url = BASE_URL + 'transaction/v2/payments'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response
 
-    def receive_payments_bill_payments(self, biller_code, **kwargs):
+    def receive_payments_bill_payments(self, **kwargs):
         ref = self.reference_no
-        payer_name = kwargs.get("payer_name")
-        account = kwargs.get("account")
-        payer_mobile_number = kwargs.get("payer_mobile_number")
+        payer_name = kwargs.get("payer_name", self.payer_name)
+        account = kwargs.get("account", self.payer_account)
+        payer_mobile_number = kwargs.get("payer_mobile_number", self.payer_account)
+        biller_code = kwargs.get("biller_code", self.biller_code)
         signature = API.signature((biller_code, self.payment_amount,
                                    ref, PARTNER_ID))
         self.headers["signature"] = signature
@@ -68,7 +74,7 @@ class ReceiveMoneyService:
             "partnerId": PARTNER_ID,
             "remarks": self.description
         }
-        url = UAT_BASE_URL + 'transaction/v2/bills/pay'
+        url = BASE_URL + 'transaction/v2/bills/pay'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response
@@ -84,16 +90,16 @@ class ReceiveMoneyService:
                 "till": merchant_till
             },
             "payment": {
-                "ref": ref,
+                "ref": self.reference_no,
                 "amount": self.payment_amount,
                 "currency": self.country_code
             },
             "partner": {
                 "id": PARTNER_ID,
-                "ref": ref
+                "ref": self.reference_no
             }
         }
-        url = UAT_BASE_URL + 'transaction/v2/tills/pay'
+        url = BASE_URL + 'transaction/v2/tills/pay'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response
@@ -105,7 +111,7 @@ class ReceiveMoneyService:
             "amount": self.payment_amount,
             "amountCurrency": self.currency_code
         }
-        url = UAT_BASE_URL + 'transaction/v2/tills/pay'
+        url = BASE_URL + 'transaction/v2/tills/pay'
         response = requests.post(url, headers=self.headers, data=json.dumps(payload))
         formatted_response = handle_response(response)
         return formatted_response

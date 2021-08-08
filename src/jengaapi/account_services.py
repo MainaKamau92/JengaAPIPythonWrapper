@@ -3,7 +3,7 @@ from datetime import date
 
 import requests
 
-from src.jengaapi import API, COUNTRY_CODE, ACCOUNT_ID, ACCOUNT_NO, UAT_BASE_URL
+from src.jengaapi import API, COUNTRY_CODE, ACCOUNT_ID, ACCOUNT_NO, BASE_URL
 from src.jengaapi.exceptions import handle_response
 
 
@@ -31,19 +31,19 @@ class AccountServices:
     def account_balance(self):
         signature = API.signature((COUNTRY_CODE, ACCOUNT_ID))
         self.headers["signature"] = signature
-        url = UAT_BASE_URL + f'account/v2/accounts/balances/{COUNTRY_CODE}/{ACCOUNT_ID}'
+        url = BASE_URL + f'account/v2/accounts/balances/{COUNTRY_CODE}/{ACCOUNT_ID}'
         return self._send_get_request(headers=self.headers, url=url)
 
     def account_mini_statement(self):
         signature = API.signature((COUNTRY_CODE, ACCOUNT_ID))
         self.headers["signature"] = signature
-        url = UAT_BASE_URL + f'account/v2/accounts/ministatement/{COUNTRY_CODE}/{ACCOUNT_ID}'
+        url = BASE_URL + f'account/v2/accounts/ministatement/{COUNTRY_CODE}/{ACCOUNT_ID}'
         return self._send_get_request(headers=self.headers, url=url)
 
     def account_inquiry_bank_accounts(self):
         signature = API.signature((COUNTRY_CODE, ACCOUNT_ID))
         self.headers["signature"] = signature
-        url = UAT_BASE_URL + f'account/v2/accounts/search/{COUNTRY_CODE}/{ACCOUNT_NO}'
+        url = BASE_URL + f'account/v2/accounts/search/{COUNTRY_CODE}/{ACCOUNT_NO}'
         return self._send_get_request(headers=self.headers, url=url)
 
     def opening_closing_account_balance(self, balance_date=date.today()):
@@ -55,7 +55,7 @@ class AccountServices:
             "accountId": ACCOUNT_ID,
             "date": str_date
         }
-        url = UAT_BASE_URL + 'account/v2/accounts/accountbalance/query'
+        url = BASE_URL + 'account/v2/accounts/accountbalance/query'
         return self._send_post_request(headers=self.headers, payload=payload, url=url)
 
     def account_full_statement(self, from_date, to_date, limit=3, **kwargs):
@@ -75,6 +75,5 @@ class AccountServices:
             "postedDateTime": posted_date_time,
             "date": date.today().strftime("%Y-%m-%d"),
         }
-
-        url = UAT_BASE_URL + 'account/v2/accounts/fullstatement'
+        url = BASE_URL + 'account/v2/accounts/fullstatement'
         return self._send_post_request(headers=self.headers, payload=payload, url=url)
