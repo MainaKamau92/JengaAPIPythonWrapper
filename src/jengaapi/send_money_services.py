@@ -9,7 +9,7 @@ from src.jengaapi.exceptions import handle_response, generate_reference
 
 class SendMoneyService:
 
-    def __init__(self, transfer_date, transfer_amount, **kwargs):
+    def __init__(self, transfer_date, transfer_amount, token=API.authorization_token, **kwargs):
         self.transfer_date = transfer_date or date.today()
         self.transfer_amount = transfer_amount or 0.00
         self.currency_code = kwargs.get('currency_code', 'KES')
@@ -19,9 +19,10 @@ class SendMoneyService:
         self.destination_name = kwargs.get('destination_name', "Jane Doe")
         self.description = kwargs.get('description', "Sending money")
         self.reference_no = generate_reference()
+        self.token = token
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': API.authorization_token
+            'Authorization': self.token
         }
         self.payload_source = dict(
             countryCode=self.country_code,
@@ -80,7 +81,7 @@ class SendMoneyService:
         return self._send_request(headers=self.headers, payload=payload)
 
     def send_rtgs(self, destination_account_number, bank_code):
-        signature = API.signature((self.reference_no, self.transfer_date,
+        signature = API.signature((self.reference_no, self.transfer_date.strftime("%Y-%m-%d"),
                                    self.source_account_number, destination_account_number,
                                    self.transfer_amount))
 
@@ -99,7 +100,7 @@ class SendMoneyService:
         address_line = kwargs.get('address_line')
         charge_option = kwargs.get('charge_option')
 
-        signature = API.signature((self.reference_no, self.transfer_date,
+        signature = API.signature((self.reference_no, self.transfer_date.strftime("%Y-%m-%d"),
                                    self.source_account_number, destination_account_number,
                                    self.transfer_amount))
         self.headers["signature"] = signature
@@ -152,8 +153,7 @@ class SendMoneyService:
                        transfer=self.payload_transfer)
         return self._send_request(headers=self.headers, payload=payload)
 
-    def send_pesalink_to_mobile_number(self, destination_mobile_number, **kwargs):
-        bank_code = kwargs.get('bank_code')
+    def send_pesalink_to_mobile_number(self, destination_mobile_number, bank_code):
         signature = API.signature((self.transfer_amount, self.currency_code,
                                    self.reference_no, self.destination_name,
                                    self.source_account_number))

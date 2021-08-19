@@ -9,6 +9,8 @@ from Crypto.Signature import PKCS1_v1_5
 from src.jengaapi.exceptions import handle_response
 from src.utils import get_project_root
 
+ENVIRONMENT = os.getenv("ENVIRONMENT")
+
 
 class JengaAPI:
     def __init__(self, api_key, password, merchant_code, base_url):
@@ -16,7 +18,7 @@ class JengaAPI:
         self._username = merchant_code
         self._password = password
         self.base_url = base_url
-        self.private_key = os.path.join(get_project_root(), "privatekey.pem")
+        self.private_key = os.path.join(get_project_root(), "privatekey.pem") if ENVIRONMENT != "testing" else os.path.join(get_project_root(), "tests/testkey.pem")
         self.merchant_code = merchant_code
 
     @property

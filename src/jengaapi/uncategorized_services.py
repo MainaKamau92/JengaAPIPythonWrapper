@@ -7,11 +7,11 @@ from src.jengaapi.exceptions import generate_reference, handle_response
 
 
 class UncategorizedServices:
-    def __init__(self, country_code=COUNTRY_CODE, currency_code="KES"):
-        self.token = API.authorization_token
+    def __init__(self, token=API.authorization_token, country_code=COUNTRY_CODE, currency_code="KES"):
+        self.token = token
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': API.authorization_token
+            'Authorization': self.token
         }
         self.country_code = country_code
         self.currency_code = currency_code

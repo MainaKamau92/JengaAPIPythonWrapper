@@ -8,30 +8,32 @@ from src.jengaapi.exceptions import generate_reference, handle_response
 
 
 class ReceiveMoneyService:
-    def __init__(self, payment_amount, country_code, description=None, currency_code='KES'):
-        self.token = API.authorization_token
+    def __init__(self, payment_amount, country_code, description=None, currency_code='KES',
+                 partner_id=PARTNER_ID, biller_code=BILLER_CODE, payer_name=PAYER_NAME,
+                 payer_account=PAYER_ACCOUNT, token=API.authorization_token):
+        self.token = token
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': API.authorization_token
+            'Authorization': self.token
         }
         self.reference_no = generate_reference()
         self.payment_amount = payment_amount or 0.00
         self.country_code = country_code or COUNTRY_CODE
         self.description = description
         self.currency_code = currency_code
-        self.partner_id = PARTNER_ID
-        self.biller_code = BILLER_CODE
-        self.payer_name = PAYER_NAME
-        self.payer_account = PAYER_ACCOUNT
+        self.partner_id = partner_id
+        self.biller_code = biller_code
+        self.payer_name = payer_name
+        self.payer_account = payer_account
 
-    def receive_payments_eazzypay_push(self, mobile_number):
+    def receive_payments_eazzypay_push(self, mobile_number, merchant_code=MERCHANT_CODE, country_code=COUNTRY_CODE):
         signature = API.signature((self.reference_no, self.payment_amount,
-                                   MERCHANT_CODE, COUNTRY_CODE))
+                                   merchant_code, country_code))
         self.headers["signature"] = signature
         payload = {
             "customer": {
                 "mobileNumber": mobile_number,
-                "countryCode": self.country_code
+                "countryCode": country_code
             },
             "transaction": {
                 "amount": self.payment_amount,
@@ -45,14 +47,14 @@ class ReceiveMoneyService:
         formatted_response = handle_response(response)
         return formatted_response
 
-    def receive_payments_bill_payments(self, **kwargs):
+    def receive_payments_bill_payments(self, partner_id=PARTNER_ID, **kwargs):
         ref = self.reference_no
         payer_name = kwargs.get("payer_name", self.payer_name)
         account = kwargs.get("account", self.payer_account)
         payer_mobile_number = kwargs.get("payer_mobile_number", self.payer_account)
         biller_code = kwargs.get("biller_code", self.biller_code)
         signature = API.signature((biller_code, self.payment_amount,
-                                   ref, PARTNER_ID))
+                                   ref, partner_id))
         self.headers["signature"] = signature
 
         payload = {
@@ -71,7 +73,7 @@ class ReceiveMoneyService:
                 "reference": ref,
                 "mobileNumber": payer_mobile_number
             },
-            "partnerId": PARTNER_ID,
+            "partnerId": partner_id,
             "remarks": self.description
         }
         url = BASE_URL + 'transaction/v2/bills/pay'
@@ -81,7 +83,7 @@ class ReceiveMoneyService:
 
     def receive_payments_merchant_payments(self, merchant_till):
         ref = self.reference_no
-        signature = API.signature((merchant_till, PARTNER_ID,
+        signature = API.signature((merchant_till, self.partner_id,
                                    self.payment_amount, self.currency_code, ref))
         self.headers["signature"] = signature
 
@@ -95,7 +97,7 @@ class ReceiveMoneyService:
                 "currency": self.country_code
             },
             "partner": {
-                "id": PARTNER_ID,
+                "id": self.partner_id,
                 "ref": self.reference_no
             }
         }

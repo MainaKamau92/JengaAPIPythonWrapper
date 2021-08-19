@@ -7,8 +7,8 @@ from src.jengaapi.exceptions import handle_response
 
 
 class SendMoneyQueriesServices:
-    def __init__(self):
-        self.token = API.authorization_token
+    def __init__(self, token=API.authorization_token):
+        self.token = token
         self.headers = {
             'Content-Type': 'application/json',
             'Authorization': API.authorization_token
