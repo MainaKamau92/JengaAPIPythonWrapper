@@ -2,8 +2,8 @@ import json
 
 import requests
 
-from src.jengaapi import API, COUNTRY_CODE, BASE_URL, MERCHANT_CODE
-from src.jengaapi.exceptions import generate_reference, handle_response
+from . import API, COUNTRY_CODE, BASE_URL, MERCHANT_CODE
+from .exceptions import generate_reference, handle_response
 
 
 class UncategorizedServices:

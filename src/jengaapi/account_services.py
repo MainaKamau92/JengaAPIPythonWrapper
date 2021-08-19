@@ -3,8 +3,8 @@ from datetime import date
 
 import requests
 
-from src.jengaapi import API, COUNTRY_CODE, ACCOUNT_ID, ACCOUNT_NO, BASE_URL
-from src.jengaapi.exceptions import handle_response
+from . import API, COUNTRY_CODE, ACCOUNT_ID, ACCOUNT_NO, BASE_URL
+from .exceptions import handle_response
 
 
 class AccountServices:

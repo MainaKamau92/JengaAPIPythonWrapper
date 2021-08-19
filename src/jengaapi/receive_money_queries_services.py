@@ -1,7 +1,7 @@
 import requests
 
-from src.jengaapi import API, BASE_URL
-from src.jengaapi.exceptions import handle_response
+from . import API, BASE_URL
+from .exceptions import handle_response
 
 
 class ReceiveMoneyQueriesService:

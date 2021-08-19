@@ -3,8 +3,8 @@ from datetime import date
 
 import requests
 
-from src.jengaapi import API, BASE_URL, COUNTRY_CODE, ACCOUNT_NO
-from src.jengaapi.exceptions import handle_response, generate_reference
+from . import API, BASE_URL, COUNTRY_CODE, ACCOUNT_NO
+from .exceptions import handle_response, generate_reference
 
 
 class SendMoneyService:

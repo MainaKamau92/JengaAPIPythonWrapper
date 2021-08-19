@@ -6,8 +6,8 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-from src.jengaapi.exceptions import handle_response
-from src.utils import get_project_root
+from .exceptions import handle_response
+from .utils import get_project_root
 
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 

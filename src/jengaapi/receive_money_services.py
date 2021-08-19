@@ -2,9 +2,9 @@ import json
 
 import requests
 
-from src.jengaapi import API, MERCHANT_CODE, COUNTRY_CODE, BASE_URL, PARTNER_ID, BILLER_CODE, PAYER_NAME, \
+from . import API, MERCHANT_CODE, COUNTRY_CODE, BASE_URL, PARTNER_ID, BILLER_CODE, PAYER_NAME, \
     PAYER_ACCOUNT
-from src.jengaapi.exceptions import generate_reference, handle_response
+from .exceptions import generate_reference, handle_response
 
 
 class ReceiveMoneyService:

@@ -1,6 +1,6 @@
 import os
 
-from src.jengaapi.auth import JengaAPI
+from .auth import JengaAPI
 
 API_KEY = os.getenv("API_KEY")
 BASE_URL = os.getenv("BASE_URL")
