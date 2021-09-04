@@ -3,13 +3,13 @@ from datetime import date
 
 import requests
 
-from . import API, COUNTRY_CODE, ACCOUNT_ID, ACCOUNT_NO, BASE_URL
+from . import BASE_URL
 from .exceptions import handle_response
 
 
 class AccountServices:
 
-    def __init__(self, token=API.authorization_token):
+    def __init__(self, token):
         self.token = token
         self.headers = {
             'Content-Type': 'application/json',
@@ -28,27 +28,27 @@ class AccountServices:
         formatted_response = handle_response(response)
         return formatted_response
 
-    def account_balance(self, country_code=COUNTRY_CODE, account_id=ACCOUNT_ID):
-        signature = API.signature((country_code, account_id))
+    def account_balance(self, signature, country_code, account_id):
+        # signature = API.signature((country_code, account_id))
         self.headers["signature"] = signature
         url = BASE_URL + f'account/v2/accounts/balances/{country_code}/{account_id}'
         return self._send_get_request(headers=self.headers, url=url)
 
-    def account_mini_statement(self, country_code=COUNTRY_CODE, account_id=ACCOUNT_ID):
-        signature = API.signature((country_code, account_id))
+    def account_mini_statement(self, country_code, account_id, signature):
+        # signature = API.signature((country_code, account_id))
         self.headers["signature"] = signature
         url = BASE_URL + f'account/v2/accounts/ministatement/{country_code}/{account_id}'
         return self._send_get_request(headers=self.headers, url=url)
 
-    def account_inquiry_bank_accounts(self, country_code=COUNTRY_CODE, account_id=ACCOUNT_ID, account_no=ACCOUNT_NO):
-        signature = API.signature((country_code, account_id))
+    def account_inquiry_bank_accounts(self, country_code, account_no, signature):
+        # signature = API.signature((country_code, account_id))
         self.headers["signature"] = signature
         url = BASE_URL + f'account/v2/accounts/search/{country_code}/{account_no}'
         return self._send_get_request(headers=self.headers, url=url)
 
-    def opening_closing_account_balance(self, country_code=COUNTRY_CODE, account_id=ACCOUNT_ID, balance_date=date.today()):
+    def opening_closing_account_balance(self, country_code, account_id, signature, balance_date=date.today()):
         str_date = balance_date.strftime("%Y-%m-%d")
-        signature = API.signature((account_id, country_code, str_date))
+        # signature = API.signature((account_id, country_code, str_date))
         self.headers["signature"] = signature
         payload = {
             "countryCode": country_code,
@@ -58,11 +58,11 @@ class AccountServices:
         url = BASE_URL + 'account/v2/accounts/accountbalance/query'
         return self._send_post_request(headers=self.headers, payload=payload, url=url)
 
-    def account_full_statement(self, from_date, to_date, country_code=COUNTRY_CODE, account_id=ACCOUNT_ID, account_no=ACCOUNT_NO, limit=3, **kwargs):
+    def account_full_statement(self, from_date, to_date, country_code, account_no, signature, limit=3, **kwargs):
         reference = kwargs.get("reference", None)
         serial = kwargs.get("serial", None)
         posted_date_time = kwargs.get("posted_date_time", None)
-        signature = API.signature((country_code, account_id))
+        # signature = API.signature((country_code, account_id))
         self.headers["signature"] = signature
         payload = {
             "countryCode": country_code,

@@ -6,19 +6,20 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
+from . import ENVIRONMENT
 from .exceptions import handle_response
 from .utils import get_project_root
 
-ENVIRONMENT = os.getenv("ENVIRONMENT")
-
 
 class JengaAPI:
-    def __init__(self, api_key, password, merchant_code, base_url):
+    def __init__(self, api_key, password, merchant_code, base_url,
+                 path_to_private_key=os.path.join(get_project_root(), "privatekey.pem")):
         self.api_key = api_key
         self._username = merchant_code
         self._password = password
         self.base_url = base_url
-        self.private_key = os.path.join(get_project_root(), "privatekey.pem") if ENVIRONMENT != "testing" else os.path.join(get_project_root(), "tests/testkey.pem")
+        self.private_key = path_to_private_key if ENVIRONMENT != "testing" else os.path.join(get_project_root(),
+                                                                                             "tests/testkey.pem")
         self.merchant_code = merchant_code
 
     @property

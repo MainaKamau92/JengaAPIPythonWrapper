@@ -1,7 +1,8 @@
 from unittest import mock
+
 from src.jengaapi.receive_money_queries_services import ReceiveMoneyQueriesService
 
-rms_instance = ReceiveMoneyQueriesService()
+rms_instance = ReceiveMoneyQueriesService(token="Bearer e.123xxxxxx")
 
 
 @mock.patch('src.jengaapi.receive_money_queries_services.requests.get')
@@ -25,7 +26,7 @@ def test_get_all_eazzypay_merchants(mock_get):
         ]
     }
     mock_get.return_value.json.return_value = mock_response
-    response = rms_instance.get_all_eazzypay_merchants(1, 1)
+    response = rms_instance.get_all_eazzy_pay_merchants(1, 1)
     assert response is not None
     assert response == mock_response
 

@@ -2,16 +2,16 @@ import json
 
 import requests
 
-from . import API, BASE_URL
+from . import BASE_URL
 from .exceptions import handle_response
 
 
 class SendMoneyQueriesServices:
-    def __init__(self, token=API.authorization_token):
+    def __init__(self, token):
         self.token = token
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': API.authorization_token
+            'Authorization': self.token
         }
 
     def account_inquiry(self, mobile_number):

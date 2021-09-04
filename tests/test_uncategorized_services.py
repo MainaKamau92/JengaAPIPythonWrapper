@@ -1,10 +1,10 @@
-from unittest import mock
 from datetime import date
+from unittest import mock
 
 from src.jengaapi.uncategorized_services import UncategorizedServices
 
-instance = UncategorizedServices(token="Bearer XXX",
-                                 country_code="KE", currency_code="KES")
+instance = UncategorizedServices(token="Bearer XXX")
+signature = b'e967CLKebZyLfa73/YYltjW5M4cHoyWeHi/5VDKJ64gOwKBvzHJRqJJrBBc34v2m4jyKkDMBtfRJeFlxbNisMAeBtkw0TRcD2LThFK27EOqLM3m8rQYa+7CJ2FhPhK+iOa4RUY+vTfkRX5JXuqOW7a3GHds8qyPaPe19cKUY33eAJL3upXnGnA3/PEhzjhb0pqk2zCI7aRzvjjVUGwUdT6LO73NVhDSWvGpLEsP0dH/stC5BoTPNNt9nY8yvGUPV7fmaPSIFn68W4L04WgePQdYkmD1UPApGcrl+L2ALY3lPaRfI6/N+0Y3NIWQyLgix+69k7V4EGolqejWdion+9A=='
 
 
 @mock.patch('src.jengaapi.uncategorized_services.requests.post')
@@ -14,8 +14,7 @@ def test_purchase_airtime(mock_post):
         "status": "SUCCESS"
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.purchase_airtime(mobile_number="0722000000", airtime_amount="2000",
-                                         telco="Equitel")
+    response = instance.purchase_airtime(signature, "KE", "0722000000", "2000", "Equitel")
     assert response is not None
     assert response == mock_response
 
@@ -66,9 +65,8 @@ def test_id_search_and_verification(mock_post):
         }
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.id_search_and_verification(document_type="ID", first_name="John",
-                                                   last_name="Doe",
+    response = instance.id_search_and_verification("ID", signature, first_name="John", last_name="Doe",
                                                    date_of_birth=date(1999, 1, 1).strftime("%Y-%m-%d"),
-                                                   document_number="25632548")
+                                                   document_number="25632548", country_code="KE")
     assert response is not None
     assert response == mock_response

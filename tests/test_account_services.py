@@ -1,8 +1,10 @@
-from unittest import mock
 from datetime import date
+from unittest import mock
+
 from src.jengaapi.account_services import AccountServices
 
 as_instance = AccountServices(token='Bearer XXXXX')
+signature = 'e967CLKebZyLfa73/YYltjW5M4cHoyWeHi/5VDKJ64gOwKBvzHJRqJJrBBc34v2m4jyKkDMBtfRJeFlxbNisMAeBtkw0TRcD2LThFK27EOqLM3m8rQYa+7CJ2FhPhK+iOa4RUY+vTfkRX5JXuqOW7a3GHds8qyPaPe19cKUY33eAJL3upXnGnA3/PEhzjhb0pqk2zCI7aRzvjjVUGwUdT6LO73NVhDSWvGpLEsP0dH/stC5BoTPNNt9nY8yvGUPV7fmaPSIFn68W4L04WgePQdYkmD1UPApGcrl+L2ALY3lPaRfI6/N+0Y3NIWQyLgix+69k7V4EGolqejWdion+9A=='
 
 
 @mock.patch('src.jengaapi.account_services.requests.get')
@@ -20,7 +22,7 @@ def test_account_balance(mock_get):
             }
         ]
     }
-    response = as_instance.account_balance('KE', '0123456789077')
+    response = as_instance.account_balance(signature, 'KE', '0123456789077')
     assert response is not None
 
 
@@ -48,7 +50,7 @@ def test_account_mini_statement(mock_get):
         ]
     }
     mock_get.return_value.json.return_value = mock_response
-    response = as_instance.account_mini_statement('KE', '0011547896523')
+    response = as_instance.account_mini_statement('KE', '0011547896523', signature)
     assert response is not None
     assert response == mock_response
 
@@ -71,7 +73,7 @@ def test_account_inquiry_bank_accounts(mock_get):
         ]
     }
     mock_get.return_value.json.return_value = mock_response
-    response = as_instance.account_inquiry_bank_accounts('KE', '0011547896523', '0011547896523')
+    response = as_instance.account_inquiry_bank_accounts('KE', '0011547896523', signature)
     assert response is not None
     assert response == mock_response
 
@@ -91,7 +93,7 @@ def test_opening_closing_account_balance(mock_post):
         ]
     }
     mock_post.return_value.json.return_value = mock_response
-    response = as_instance.opening_closing_account_balance('KE', '0011547896523')
+    response = as_instance.opening_closing_account_balance('KE', '0011547896523', signature)
     assert response is not None
     assert response == mock_response
 
@@ -147,7 +149,6 @@ def test_account_full_statement(mock_post):
     mock_post.return_value.json.return_value = mock_response
     response = as_instance.account_full_statement(from_date=date(2018, 7, 1), to_date=date(2018, 7, 30),
                                                   country_code='KE', account_id='0011547896523',
-                                                  account_no='0011547896523', limit=3)
+                                                  account_no='0011547896523', signature=signature, limit=3)
     assert response is not None
     assert response == mock_response
-

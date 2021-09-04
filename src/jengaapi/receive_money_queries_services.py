@@ -1,36 +1,19 @@
 import requests
 
-from . import API, BASE_URL
+from . import BASE_URL
 from .exceptions import handle_response
 
 
 class ReceiveMoneyQueriesService:
 
-    def __init__(self):
-        self.token = API.authorization_token
+    def __init__(self, token):
+        self.token = token
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': API.authorization_token
+            'Authorization': self.token
         }
 
-    def get_all_eazzypay_merchants(self, per_page, page):
-        """
-        {'merchant': [
-        {'name': 'NARAPU NGAI SOKO WOMEN GROUP', 'tillnumber': '0766123456'},
-        {'name': 'ST AKIDIVA MEMORIAL HOSPITAL', 'tillnumber': '0766555002'},
-        {'name': 'JOSIAH NJOROGE MUNGAI', 'tillnumber': '0766555003'},
-        {'name': 'JEMIMAH NJOKI WACHIRA', 'tillnumber': '0766555004'},
-        {'name': 'GEORGE JOSEPH NJOROGE', 'tillnumber': '0766555005'},
-        {'name': 'SUSAN  BETT', 'tillnumber': '0766555006'},
-        {'name': 'WILLIAM KARIUKI MACHARIA', 'tillnumber': '0766555016'},
-        {'name': 'JAMES KAURA NJOROGE', 'tillnumber': '0766555020'},
-        {'name': 'JOSEPH  NINGORI KILUSU', 'tillnumber': '0766555021'},
-        {'name': 'MARTIN KARIUKI MAINGI', 'tillnumber': '0766555022'}
-        ]}
-        :param per_page:
-        :param page:
-        :return:
-        """
+    def get_all_eazzy_pay_merchants(self, per_page, page):
         url = BASE_URL + f'transaction/v2/merchants?per_page={per_page}&page={page}'
         response = requests.get(url, headers=self.headers)
         formatted_response = handle_response(response)
@@ -49,15 +32,6 @@ class ReceiveMoneyQueriesService:
         return formatted_response
 
     def get_all_billers(self, per_page, page):
-        """
-        {'billers': [{'name': 'KPLC LTD-COLLECTION A/C', 'code': '061001'},
-        {'name': 'MAJAUJACKSON STEPHEN', 'code': '771654'},
-        {'name': 'KNEC 1', 'code': '511000'},
-        {'name': 'KNEC 2', 'code': '047002'}]}
-        :param per_page:
-        :param page:
-        :return:
-        """
         url = BASE_URL + f'transaction/v2/billers?per_page={per_page}&page={page}'
         response = requests.get(url, headers=self.headers)
         formatted_response = handle_response(response)

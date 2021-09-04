@@ -2,9 +2,8 @@ from unittest import mock
 
 from src.jengaapi.receive_money_services import ReceiveMoneyService
 
-instance = ReceiveMoneyService(payment_amount="345.00", country_code="KE", description="Money Sent",
-                               currency_code='KES', partner_id="5673344", biller_code="547547", payer_name="John Doe",
-                               payer_account="0763000000", token="Bearer xxxxxxx")
+instance = ReceiveMoneyService(token="Bearer xxxxxxx")
+signature = 'e967CLKebZyLfa73/YYltjW5M4cHoyWeHi/5VDKJ64gOwKBvzHJRqJJrBBc34v2m4jyKkDMBtfRJeFlxbNisMAeBtkw0TRcD2LThFK27EOqLM3m8rQYa+7CJ2FhPhK+iOa4RUY+vTfkRX5JXuqOW7a3GHds8qyPaPe19cKUY33eAJL3upXnGnA3/PEhzjhb0pqk2zCI7aRzvjjVUGwUdT6LO73NVhDSWvGpLEsP0dH/stC5BoTPNNt9nY8yvGUPV7fmaPSIFn68W4L04WgePQdYkmD1UPApGcrl+L2ALY3lPaRfI6/N+0Y3NIWQyLgix+69k7V4EGolqejWdion+9A=='
 
 
 @mock.patch('src.jengaapi.receive_money_services.requests.post')
@@ -14,8 +13,8 @@ def test_receive_payments_eazzypay_push(mock_post):
         "status": "SUCCESS"
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.receive_payments_eazzypay_push(mobile_number="0763000000", merchant_code="692194625798",
-                                                       country_code="KE")
+    response = instance.receive_payments_eazzypay_push(signature, mobile_number="0763000000", description="remarks",
+                                                       country_code="KE", payment_amount="1234.00")
     assert response is not None
     assert response == mock_response
 
@@ -27,7 +26,14 @@ def test_receive_payments_bill_payments(mock_post):
         "status": "SUCCESS"
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.receive_payments_bill_payments(partner_id="567334444")
+    response = instance.receive_payments_bill_payments(signature, partner_id="567334444", payer_name="",
+                                                       account="111222",
+                                                       payer_mobile_number="0763000000",
+                                                       biller_code="320320",
+                                                       country_code="KE",
+                                                       payment_amount="100.00",
+                                                       currency_code="KES",
+                                                       remarks="remarks of the bill payment")
     assert response is not None
     assert response == mock_response
 
@@ -40,7 +46,11 @@ def test_receive_payments_merchant_payments(mock_post):
         "transactionId": "931118931118"
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.receive_payments_merchant_payments(merchant_till="0766000000")
+    response = instance.receive_payments_merchant_payments(signature,
+                                                           merchant_till="0766000000",
+                                                           payment_amount="1000.00",
+                                                           country_code="KE",
+                                                           partner_id="0011547896523")
     assert response is not None
     assert response == mock_response
 
@@ -60,6 +70,9 @@ def test_bill_validation(mock_post):
         }
     }
     mock_post.return_value.json.return_value = mock_response
-    response = instance.bill_validation(biller_code="320320", customer_ref_number="111222")
+    response = instance.bill_validation(biller_code="320320",
+                                        customer_ref_number="111222",
+                                        payment_amount="1000.00",
+                                        currency_code="KES")
     assert response is not None
     assert response == mock_response
