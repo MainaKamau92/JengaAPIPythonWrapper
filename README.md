@@ -6,21 +6,24 @@ A simple python wrapper around the JengaAPI from Equity Bank
 
 ## Setup
 
+Installation
+`pip install python-jengaapi`
+
 Before beginning add these two environment variables i your .env file:
 
 - BASE_URL="https://yourbaseurl.io" # if non is provided it defaults to https://uat.jengahq.io/
-- ENVIRONMENT="testing/production"
+- ENVIRONMENT="production"
 
 ## SendMoneyService
 
 ```pycon
 
 # Initial Setup
->>> from src.jengaapi.auth import JengaAPI
+>>> from jengaapi.auth import JengaAPI
 >>> API = JengaAPI(api_key="Basic TFZXxx", password="EhPPgRx4ZpxDrrznGdm25d", merchant_code="8995674492", base_url="https://uat.jengahq.io/")
 >>> token = API.authorization_token
 
->>> from src.jengaapi.send_money_services import SendMoneyService
+>>> from jengaapi.send_money_services import SendMoneyService
 >>> send_money = SendMoneyService(token=token)
 ```
 
