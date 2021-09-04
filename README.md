@@ -7,9 +7,10 @@ A simple python wrapper around the JengaAPI from Equity Bank
 ## Setup
 
 Installation
-`pip install python-jengaapi`
 
-Before beginning add these two environment variables i your .env file:
+```pip install python-jengaapi```
+
+Before beginning add these two environment variables in your .env file:
 
 - BASE_URL="https://yourbaseurl.io" # if non is provided it defaults to https://uat.jengahq.io/
 - ENVIRONMENT="production"
@@ -61,3 +62,7 @@ Before beginning add these two environment variables i your .env file:
 >>> send_money.send_rtgs(signature, destination_account_number="0340197385508", bank_code="01", country_code="KE", source_name="John Doe", source_account_number="0770194201783", destination_name="Jane Doe", transfer_amount="1500.00", currency_code="KES", reference_no="162955622013", transfer_date=date.today(), description="Send Money")
 {'transactionId': '000002399997', 'status': 'SUCCESS'}
 ```
+
+## To All Users
+
+> This is the very first release of the package and despite most of the functionality already tested during development, a few bugs are expected. Feel free to create an issue and tag me and i'll get on it ASAP
