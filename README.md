@@ -4,6 +4,13 @@
 
 A simple python wrapper around the JengaAPI from Equity Bank
 
+## Setup
+
+Before beginning add these two environment variables i your .env file:
+
+- BASE_URL="https://yourbaseurl.io" # if non is provided it defaults to https://uat.jengahq.io/
+- ENVIRONMENT="testing/production"
+
 ## SendMoneyService
 
 ```pycon
