@@ -1,229 +1,362 @@
-import json
+# -*- coding: utf-8 -*-
+"""Jenga API Send Money Service.
+
+This module demonstrates documentation for the money sending service foe the Equity bank JengaAPI v3.
+This web service covers all 6 countries (KE, RW, UG, TZ, DRC, SS) in which Equity Bank operates in.
+Including:
+- send_within_equity(self, signature: str, api_token: str, **payload: dict)
+- send_to_mobile_wallets(self, signature: str, api_token: str, **payload: dict)
+- send_rtgs(self, signature: str, api_token: str, **payload: dict)
+- send_swift(self, signature: str, api_token: str, **payload: dict)
+- send_pesalink_to_bank_account(self, signature: str, api_token: str, **payload: dict)
+- send_pesalink_to_mobile_number(self, signature: str, api_token: str, **payload: dict)
+"""
+from json import JSONDecodeError
+from typing import Union
 
 import requests
-
 from . import BASE_URL
-from .exceptions import handle_response, generate_reference
+from .exceptions import handle_response
 
 
 class SendMoneyService:
+    """Send Money Service Class. This class contains all the methods for the send money service.
+    """
 
-    def __init__(self, token):
-        self.token = token
-        self.headers = {
-            'Content-Type': 'application/json',
-            'Authorization': self.token
+    @staticmethod
+    def _prepare_request_header(signature: str, token: str) -> dict:
+        """Prepare header for the send money request to the Jenga API
+
+        Args:
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant
+            token(str): The bearer token used to access the API
+
+        Returns:
+            Dict object representing the headers for the request
+        """
+        return {
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "signature": signature
         }
-        self.reference_no = generate_reference()
 
     @staticmethod
-    def _generate_payload_source(country_code, source_name, source_account_number):
-        return dict(
-            countryCode=country_code,
-            name=source_name,
-            accountNumber=source_account_number
-        )
+    def _send_request(headers: dict, payload: dict, param=Union[str, None]) -> Union[dict, JSONDecodeError]:
+        """Sends a request to the Jenga API and returns a `dict` object of the response.
 
-    @staticmethod
-    def _generate_payload_destination(country_code, destination_name):
-        return dict(
-            type=None,
-            countryCode=country_code,
-            name=destination_name,
-        )
+        Args:
+            headers(dict): A dict matching expected headers for the request.
+            payload(dict): Dict of the expected body/payload of the request.
+            param(str): Extra parameter to be appended to the base url.
 
-    @staticmethod
-    def _generate_payload_transfer(transfer_amount, currency_code, reference_no,
-                                   transfer_date, description):
-        return dict(
-            type=None,
-            amount=str(transfer_amount),
-            currencyCode=currency_code,
-            reference=reference_no,
-            date=transfer_date.strftime("%Y-%m-%d"),
-            description=description
-        )
+        Returns:
+            dict: A dict object of the response.
+        """
+        url = BASE_URL + f'v3-apis/transaction-api/v3.0/remittance/{param}'
+        response = requests.post(url, json=payload, headers=headers)
+        return handle_response(response)
 
-    @staticmethod
-    def _send_request(headers, payload):
-        url = BASE_URL + f'transaction/v2/remittance'
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        formatted_response = handle_response(response)
-        return formatted_response
+    def send_within_equity(self, signature: str, api_token: str, **payload: dict) -> dict:
+        """Handles funds dispatch within Equity Bank.
 
-    @staticmethod
-    def _redundant_params(kwargs):
-        country_code = kwargs.get("country_code")
-        source_name = kwargs.get("source_name")
-        source_account_number = kwargs.get("source_account_number")
-        destination_name = kwargs.get("destination_name")
-        transfer_amount = kwargs.get("transfer_amount")
-        currency_code = kwargs.get("currency_code")
-        reference_no = kwargs.get("reference_no")
-        transfer_date = kwargs.get("transfer_date")
-        description = kwargs.get("description")
-        return (country_code, source_name, source_account_number, destination_name,
-                transfer_amount, currency_code, reference_no, transfer_date, description)
+        Args:
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                       Built using a String of concatenated values of the request fields with the following order:
+                       source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                       The resulting text is then signed with Private Key and Base64 encoded.
+            api_token: The Bearer token used to access the API
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                      {
+                       "source": {
+                          "countryCode": "KE", # the sender's ISO country code
+                          "name": "John Doe", # sender's full name
+                          "accountNumber": "0011547896523" # sender's account number
+                       },
+                       "destination": {
+                          "type": "bank", # the recipient's store of value. In this case its bank
+                          "countryCode": "KE", # the recipient's ISO country code
+                          "name": "Tom Doe", # recipient's full name
+                          "accountNumber": "0060161911111" # recipient's account number
+                       },
+                       "transfer": {
+                          "type": "InternalFundsTransfer", # the transfer type. In this case its InternalFundsTransfer.
+                          "amount": "100.00", # the amount to be transferred
+                          "currencyCode": "KES", # the amount's ISO currency
+                          "reference": "742194625798", # the sender's reference number. unique 12 digit string for each
+                                        transfer
+                          "date": "2019-05-01", # the transfer date ISO 8601 date format 'YYYY-MM-DD'
+                          "description": "Some remarks here" # any additional information the sender would like to add
+                       }
+                    }
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+              "status": true,
+              "code": 0,
+              "message": "success",
+              "data": {
+                "transactionId": "54154",
+                "status": "SUCCESS"
+              }
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="internalBankTransfer")
 
-    def send_within_equity(self, signature, **kwargs):
-        destination_account_number = kwargs.get("destination_account_number")
+    def send_to_mobile_wallets(self, signature: str, api_token: str, **payload: dict):
+        """This enables your application to send money to telco wallets across Kenya, Uganda, Tanzania & Rwanda.
+        Kindly note in order to get a response you will need to test this in production.
 
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
+        Args:
+            api_token: The Bearer token used to access the API
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                           Built using a String of concatenated values of the request fields with the following order:
+                           source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                           The resulting text is then signed with Private Key and Base64 encoded.
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                          {
+                             "source": {
+                                  "countryCode": "KE", # the sender's ISO country code
+                                  "name": "John Doe", # sender's full name
+                                  "accountNumber": "0011547896523" # sender's account number
+                               },
+                             "destination": {
+                                  "type": "mobile", # the recipient's store of value type. This will always be mobile
+                                  "countryCode": "KE",# the recipient's ISO country code
+                                  "name": "A N.Other",# the recipient's full name.
+                                  "mobileNumber": "0763123456", # the recipient's number (e.g. 0763123456)
+                                  "walletName": "Mpesa" # recipient's wallet name for example Airtel,Mpesa,Equitel
+                             },
+                             "transfer": {
+                                  "type": "MobileWallet", # the transfer mode. set to MobileWallet
+                                  "amount": "1000",
+                                  "currencyCode": "KES",
+                                  "date": "2018-08-18", # the transfer date ISO 8601 date format 'YYYY-MM-DD'
+                                  "description": "some remarks here"
+                             }
+                        }
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+                "status": true,
+                "code": 0,
+                "message": "success",
+                "data": {
+                  "transactionId": "",
+                  "status": "SUCCESS"
+                }
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="sendmobile")
 
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
-        self.headers["signature"] = signature
-        payload_destination["type"] = "bank"
-        payload_destination["accountNumber"] = destination_account_number
-        payload_transfer["type"] = "InternalFundsTransfer"
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
+    def send_rtgs(self, signature: str, api_token: str, **payload: dict):
+        """The Real Time Gross Settlement (RTGS) web-service enables an application
+        to send money intra-country to other bank accounts.
 
-    def send_to_mobile_wallets(self, signature, **kwargs):
-        wallet_name = kwargs.get("wallet_name")
-        destination_mobile_number = kwargs.get("destination_mobile_number")
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
-        self.headers["signature"] = signature
-        payload_destination["type"] = "mobile"
-        payload_destination["mobileNumber"] = destination_mobile_number
-        payload_destination["walletName"] = wallet_name
-        payload_transfer["type"] = "MobileWallet"
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
+        Note:
+            CDD - KYC & CFT: In line with various banking regulations your send money transaction will
+                             be subjected to various verifications, you may be required to provide additional
+                             information.
+            Transaction Time: RTGS is available on weekdays between 9am and 3pm. If you send after these hours,
+                              your transaction will be queued and sent at the next available transaction window.
 
-    def send_rtgs(self, signature, **kwargs):
-        destination_account_number = kwargs.get("destination_account_number")
-        bank_code = kwargs.get("bank_code")
+        Args:
+            api_token: The Bearer token used to access the API
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                           Built using a String of concatenated values of the request fields with the following order:
+                           source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                           The resulting text is then signed with Private Key and Base64 encoded.
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                            {"source": {
+                                    "countryCode": "KE",
+                                    "name": "John Doe",
+                                    "accountNumber": "0011547896523",
+                                    "currency" : "KES"
+                                },
+                                "destination": {
+                                    "type": "bank",
+                                    "countryCode": "KE",
+                                    "name": "Tom Doe",
+                                    "bankCode": "70",
+                                    "accountNumber": "12365489"
+                                },
+                                "transfer": {
+                                    "type": "RTGS",
+                                    "amount": "4.00",
+                                    "currencyCode": "KES",
+                                    "reference": "692194625798",
+                                    "date": "2019-05-01",
+                                    "description": "Some remarks here"
+                                }}
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+                "transactionId": "000000403777",
+                "status": "SUCCESS"
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="rtgs")
 
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
+    def send_swift(self, signature: str, api_token: str, **payload: dict):
+        """The swift web-service enables your application to send cross-border remittances.
 
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
+        Note:
+            CDD - KYC & CFT: In line with various banking regulations your send money transaction will
+                             be subjected to various verifications, you may be required to provide additional
+                             information.
+            Transaction Time: RTGS is available on weekdays between 9am and 3pm. If you send after these hours,
+                              your transaction will be queued and sent at the next available transaction window.
 
-        self.headers["signature"] = signature
-        payload_destination["type"] = "bank"
-        payload_destination["bankCode"] = bank_code
-        payload_destination["accountNumber"] = destination_account_number
-        payload_transfer["type"] = "RTGS"
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
+        Args:
+            api_token: The Bearer token used to access the API
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                           Built using a String of concatenated values of the request fields with the following order:
+                           source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                           The resulting text is then signed with Private Key and Base64 encoded.
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                            {"source": {
+                                  "countryCode": "KE",
+                                  "name": "John Doe",
+                                  "accountNumber": "0011547896523"
+                               },
+                               "destination": {
+                                  "type": "bank",
+                                  "countryCode": "JP",
+                                  "name": "Tom Doe",
+                                  "bankBic": "BOTKJPJTXXX",
+                                  "accountNumber": "12365489",
+                                  "addressline1": "Post Box 56" # recipient address
+                               },
+                               "transfer": {
+                                  "type": "SWIFT",
+                                  "amount": "4.00",
+                                  "currencyCode": "USD",
+                                  "reference": "692194625798",
+                                  "date": "2019-05-01",
+                                  "description": "Some remarks here",
+                                  "chargeOption": "SELF" #  charge option. Can be one of SELF OTHER. SELF -
+                                                            Correspondent bank charges are levied on us as the bank
+                                                            hence we charge an upfront extra $20 on the sender to
+                                                            cover for some of that cost. It will be reviewed upwards
+                                                            from time to time OTHER - Correspondent bank charges are
+                                                            levied on funds in transit
+                               }}
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+                "transactionId": "000000403777",
+                "status": "SUCCESS"
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="swift")
 
-    def send_swift(self, signature, **kwargs):
-        bank_bic = kwargs.get('bank_bic')
-        address_line = kwargs.get('address_line')
-        charge_option = kwargs.get('charge_option')
-        destination_account_number = kwargs.get('destination_account_number')
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
+    def send_pesalink_to_bank_account(self, signature: str, api_token: str, **payload: dict):
+        """This web service enables an application to send money to a PesaLink participating bank.
+        It is restricted to Kenya.
 
-        self.headers["signature"] = signature
-        payload_destination["type"] = "bank"
-        payload_destination["bankBic"] = bank_bic
-        payload_destination["accountNumber"] = destination_account_number
-        payload_destination["addressline1"] = address_line
-        payload_transfer["type"] = "SWIFT"
-        payload_transfer["chargeOption"] = charge_option
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
+        Note:
+            To check whether your recipient's bank is participating on PesaLink, go to;
+            https://ipsl.co.ke/participating-banks/
 
-    def send_eft(self, signature, **kwargs):
-        bank_code = kwargs.get('bank_code')
-        branch_code = kwargs.get('branch_code')
-        destination_account_number = kwargs.get('destination_account_number')
+        Args:
+            api_token: The Bearer token used to access the API
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                           Built using a String of concatenated values of the request fields with the following order:
+                           source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                           The resulting text is then signed with Private Key and Base64 encoded.
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                            {"source": {
+                              "countryCode": "KE",
+                              "name": "John Doe",
+                              "accountNumber": "0011547896523"
+                           },
+                           "destination": {
+                              "type": "bank",
+                              "countryCode": "KE",
+                              "name": "Tom Doe",
+                              "bankCode": "63",
+                              "accountNumber": "0090207635001"
+                           },
+                           "transfer": {
+                              "type": "PesaLink",
+                              "amount": "4.00",
+                              "currencyCode": "KES",
+                              "reference": "692194625798",
+                              "date": "2019-05-01",
+                              "description": "Some remarks here"
+                           }}
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+               "transactionId": "10000345333355",
+               "status": "SUCCESS",
+               "description": "Confirmed. Ksh 100 Sent to 01100762802910 -Tom Doe
+                              from your account 1460163242696 on 20-05-2019 at 141313 Ref. 707700078800 Thank you"
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="pesalinkacc")
 
-        # signature = API.signature((self.reference_no, self.source_account_number,
-        #                            destination_account_number, self.transfer_amount,
-        #                            bank_code))
+    def send_pesalink_to_mobile_number(self, signature: str, api_token: str, **payload: dict):
+        """This web service enables an application to send money to a PesaLink participating bank.
+        It is restricted to Kenya.
 
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
+        Note:
+            To check whether your recipient's bank is participating on PesaLink, go to;
+            https://ipsl.co.ke/participating-banks/
 
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
+        Args:
+            api_token: The Bearer token used to access the API
+            signature(str): A SHA-256 signature to proof that this request is coming from the merchant.
+                           Built using a String of concatenated values of the request fields with the following order:
+                           source.accountNumber,transfer.amount,transfer.currencyCode,transfer.reference.
+                           The resulting text is then signed with Private Key and Base64 encoded.
+            **payload(dict): Expected details of the transaction. Which should take the shape of:
+                            {"source": {
+                              "countryCode": "KE",
+                              "name": "John Doe",
+                              "accountNumber": "0011547896523"
+                           },
+                           "destination": {
+                              "type": "mobile",
+                              "countryCode": "KE",
+                              "name": "Tom Doe",
+                              "bankCode": "01",
+                              "mobileNumber": "0722000000"
+                           },
+                           "transfer": {
+                              "type": "PesaLink",
+                              "amount": "40.00",
+                              "currencyCode": "KES",
+                              "reference": "692194625798",
+                              "date": "2019-05-01",
+                              "description": "Some remarks here"
+                           }}
+        Returns:
+            Dict payload response from the Jenga API
+            Example Response:
+            {
+                "status": true,
+                "code": 0,
+                "message": "success",
+                "data": {
+                    "description": "Confirmed. Ksh 100.0 sent to 254764000000- John Doe from your account 1464968850106
+                    on Fri Jun 24 11:07:02 EAT 2022. Ref 041108128674. Thank you",
+                    "transactionId": "041108128674",
+                    "status": "SUCCESS"
+                }
+            }
+        """
+        headers = self._prepare_request_header(signature, api_token)
+        return self._send_request(headers=headers, payload=payload, param="pesalinkMobile")
 
-        self.headers["signature"] = signature
-        payload_destination["type"] = "bank"
-        payload_destination["bankCode"] = bank_code
-        payload_destination["branchCode"] = branch_code
-        payload_destination["accountNumber"] = destination_account_number
-        payload_transfer["type"] = "EFT"
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
 
-    def send_pesalink_to_bank_account(self, signature, **kwargs):
-        bank_code = kwargs.get('bank_code')
-        mobile_number = kwargs.get('mobile_number')
-        destination_account_number = kwargs.get('destination_account_number')
-
-        # signature = API.signature((self.transfer_amount, self.currency_code, self.reference_no,
-        #                            self.destination_name, self.source_account_number))
-
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
-
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
-
-        self.headers["signature"] = signature
-        payload_destination["type"] = "bank"
-        payload_destination["bankCode"] = bank_code
-        payload_destination["mobileNumber"] = mobile_number
-        payload_destination["accountNumber"] = destination_account_number
-        payload_transfer["type"] = "PesaLink"
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
-
-    def send_pesalink_to_mobile_number(self, signature, **kwargs):
-        destination_mobile_number = kwargs.get("destination_mobile_number")
-        bank_code = kwargs.get("bank_code")
-        # signature = API.signature((self.transfer_amount, self.currency_code,
-        #                            self.reference_no, self.destination_name,
-        #                            self.source_account_number))
-
-        (country_code, source_name, source_account_number, destination_name,
-         transfer_amount, currency_code, reference_no, transfer_date, description) = self._redundant_params(kwargs)
-
-        payload_destination = self._generate_payload_destination(country_code, destination_name)
-        payload_source = self._generate_payload_source(country_code, source_name, source_account_number)
-        payload_transfer = self._generate_payload_transfer(transfer_amount, currency_code,
-                                                           reference_no, transfer_date, description)
-
-        self.headers["signature"] = signature
-        payload_destination["type"] = "mobile"
-        payload_destination["bankCode"] = bank_code
-        payload_destination["mobileNumber"] = destination_mobile_number
-        payload = dict(source=payload_source,
-                       destination=payload_destination,
-                       transfer=payload_transfer)
-        return self._send_request(headers=self.headers, payload=payload)
+send_money_service = SendMoneyService()
