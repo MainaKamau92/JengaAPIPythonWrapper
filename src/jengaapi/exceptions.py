@@ -10,13 +10,7 @@ def handle_response(response):
     as errors occur and returns a `dict` object from the `json` response
     """
     try:
-        resp = response.json()
-        if resp.get("error"):
-            raise requests.exceptions.RequestException(
-                resp["code"] + " : " + resp["message"]
-            )
-        else:
-            return response.json()
+        return response.json()
     except json.decoder.JSONDecodeError as e:
         raise ("An error occurred decoding the JSON response" + str(e))
 
