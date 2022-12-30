@@ -9,14 +9,15 @@ instance = JengaAPI(api_key="Basic XXXX", consumer_secret="consumer_secret",
 @mock.patch('src.jengaapi.auth.requests.post')
 def test_authorization_token(mock_post):
     mock_post.return_value.json.return_value = {
-        "token_type": "bearer",
-        "issued_at": "1443102144106",
-        "expires_in": "3599",
-        "access_token": "ceTo5RCpluTfGn9B3OZXnnQkDVKM"
+        "accessToken": "exxxxxxxx",
+        "refreshToken": "Q/lKyyNKrtQP",
+        "expiresIn": "2022-12-30T13:12:27Z",
+        "issuedAt": "2022-12-30T12:57:27Z",
+        "tokenType": "Bearer"
     }
     response = instance.authorization_token
     assert response is not None
-    assert response == 'Bearer ceTo5RCpluTfGn9B3OZXnnQkDVKM'
+    assert response == 'Bearer exxxxxxxx'
 
 
 def test_signature_generation():
