@@ -2,13 +2,12 @@ from unittest import mock
 
 from src.jengaapi.auth import JengaAPI
 
-instance = JengaAPI(api_key="Basic XXXX", consumer_secret="consumer_secret",
-                    merchant_code="8900124", base_url="https://uat.finserve.africa/")
+instance = JengaAPI(consumer_secret="consumer_secret", merchant_code="8900124")
 
 
-@mock.patch('src.jengaapi.auth.requests.post')
-def test_authorization_token(mock_post):
-    mock_post.return_value.json.return_value = {
+@mock.patch('src.jengaapi.auth.send_post_request')
+def test_authorization_token(send_post_request_mock):
+    send_post_request_mock.return_value = {
         "accessToken": "exxxxxxxx",
         "refreshToken": "Q/lKyyNKrtQP",
         "expiresIn": "2022-12-30T13:12:27Z",
