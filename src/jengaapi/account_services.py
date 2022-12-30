@@ -14,26 +14,25 @@ class AccountServices:
     @classmethod
     def account_mini_statement(cls, signature: str, api_token: str, country_code: str, account_no: str):
         headers = prepare_request_header(signature, api_token)
-        url = f"{cls.service_url}ministatement/{country_code}/{account_no}"
+        url = f"{cls.service_url}miniStatement/{country_code}/{account_no}"
         return send_get_request(headers, url)
 
-    @staticmethod
-    def account_inquiry_bank_accounts(signature: str, api_token: str, country_code: str, account_no: str):
+    @classmethod
+    def account_inquiry_bank_accounts(cls, signature: str, api_token: str, country_code: str, account_no: str):
         headers = prepare_request_header(signature, api_token)
-        url = f"{BASE_URL}v3-apis/account-api/v3.0/search/{country_code}/{account_no}"
-        print(url)
+        url = f"{cls.service_url}search/{country_code}/{account_no}"
         return send_get_request(headers, url)
 
     @classmethod
     def opening_closing_account_balance(cls, signature: str, api_token: str, **payload: dict):
         headers = prepare_request_header(signature, api_token)
-        url = f"{cls.service_url}accountbalance/query"
+        url = f"{cls.service_url}accountBalance/query"
         return send_post_request(headers=headers, payload=payload, url=url)
 
     @classmethod
     def account_full_statement(cls, signature: str, api_token: str, **payload: dict):
         headers = prepare_request_header(signature, api_token)
-        url = f"{cls.service_url}fullstatement"
+        url = f"{cls.service_url}fullStatement"
         return send_post_request(headers=headers, payload=payload, url=url)
 
 
