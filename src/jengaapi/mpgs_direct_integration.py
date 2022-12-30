@@ -25,8 +25,17 @@ class MPGSDirectIntegration:
         url = f"{cls.service_url}authorizePayment"
         return send_post_request(headers=headers, payload=payload, url=url)
 
+    @classmethod
+    def mpgs_query_payment(cls, signature: Union[None, str], api_token: str, **payload: dict):
+        headers = prepare_request_header(signature, api_token)
+        url = f"{cls.service_url}transactionStatus"
+        return send_post_request(headers=headers, payload=payload, url=url)
 
-
+    @classmethod
+    def mpgs_refund_payment(cls, signature: Union[None, str], api_token: str, **payload: dict):
+        headers = prepare_request_header(signature, api_token)
+        url = f"{cls.service_url}refundPayment"
+        return send_post_request(headers=headers, payload=payload, url=url)
 
 
 mpgs_direct_integration = MPGSDirectIntegration()
