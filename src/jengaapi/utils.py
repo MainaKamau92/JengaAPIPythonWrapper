@@ -1,8 +1,10 @@
-from pathlib import Path
+import datetime
 from json import JSONDecodeError
+from pathlib import Path
 from typing import Union
 
 import requests
+
 from .exceptions import handle_response
 
 
@@ -32,3 +34,14 @@ def send_post_request(headers: dict, payload: dict, url: str) -> Union[dict, JSO
 def send_get_request(headers: dict, url: str) -> Union[dict, JSONDecodeError]:
     response = requests.get(url, headers=headers)
     return handle_response(response)
+
+
+def generate_reference() -> str:
+    """
+    Generate a transaction reference
+    Should always be a 12 digit String
+    """
+
+    a = datetime.datetime.now()
+    ref = "".join(str(a).replace(" ", "").replace("-", "").split(":")[0:2])
+    return ref

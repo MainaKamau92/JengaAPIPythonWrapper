@@ -3,11 +3,9 @@ import os
 from datetime import datetime
 
 from src.jengaapi.auth import JengaAPI
-from src.jengaapi.exceptions import generate_reference
-from src.jengaapi.receive_money_queries_services import receive_money_queries_service
-from src.jengaapi.receive_money_services import receive_money_service
-from src.jengaapi.send_money_imt_services import send_money_imt_service
+from src.jengaapi.mpgs_direct_integration import mpgs_direct_integration
 from src.jengaapi.uncategorized_services import miscellaneous_services
+from src.jengaapi.utils import generate_reference
 
 API_KEY = os.getenv("API_KEY")
 CONSUMER_SECRET = os.getenv("CONSUMER_SECRET")
@@ -25,18 +23,47 @@ DATE = datetime.now().date().strftime("%Y-%m-%d")
 DEST_ACC_NO = "0250163591202"
 DOCUMENT_NUMBER = "29009055"
 payload = {
-   "identity": {
-      "documentType": "ID",
-      "firstName": "Lewis",
-      "lastName": "Maina",
-      "dateOfBirth": "1992-07-05",
-      "documentNumber": DOCUMENT_NUMBER,
-      "countryCode": COUNTRY_CODE,
-   }
+    "transactionReference": "NCJASSOPK101004",
+    "customer": {
+        "email": "john@yopmail.com",
+        "firstName": "John",
+        "cardFirstName": "John",
+        "cardLastName": "Doe",
+        "lastName": "Smith",
+        "mobilePhone": "0763000000"
+    },
+    "order": {
+        "amount": 258.75,
+        "currency": "KES",
+        "description": "Card payment for order OR1649092214608",
+        "subMerchant": {
+            "address": {
+                "city": "Kisumu",
+                "company": "Kilimall",
+                "postalZip": "01001",
+                "stateProvince": "Kisumu",
+                "street": "Kilimani"
+            },
+            "email": "john@yopmail.com",
+            "tradingName": "Kilimall",
+            "phone": "254763000000",
+            "identifier": "2179103820"
+        }
+    },
+    "sourceOfFunds": {
+        "cardNumber": "22d5fd8f8df08ba34a1dcbf84011ae783c326e9fcefd08501e40722c7aeeb946abb6255714b7289eef562748920b873be2aHMpN/qcSMMeh12GL5pxWLo9Y7fDn2lqUou0ICcBs=",
+        "cardSecurity": "1fd3b576cb487da80b30551c0e66ee2768a5cb5c99c121d91e4721947914c01ee919ab8943475ca5847bf796241da2448EILoGUe8QuoJsNg4Vp7JQ==",
+        "cardExpiryYear": "34",
+        "cardExpiryMonth": "10"
+    },
+    "transaction": {
+        "source": "INTERNET",
+        "sourceOwner": "FINSERVE"
+    }
 }
 api = JengaAPI(API_KEY, CONSUMER_SECRET, MERCHANT_CODE, BASE_URL)
 api_token = api.authorization_token
 data = (COUNTRY_CODE, DOCUMENT_NUMBER)
 signature = api.signature(data)
-res = miscellaneous_services.kyc(signature, api_token, **payload)
+res = mpgs_direct_integration.mpgs_authorize_payment(None, api_token, **payload)
 print(res)

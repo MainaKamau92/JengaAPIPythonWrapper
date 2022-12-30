@@ -1,7 +1,4 @@
-import datetime
 import json
-
-import requests
 
 
 def handle_response(response):
@@ -15,12 +12,3 @@ def handle_response(response):
         raise ("An error occurred decoding the JSON response" + str(e))
 
 
-def generate_reference() -> str:
-    """
-    Generate a transaction reference
-    Should always be a 12 digit String
-    """
-
-    a = datetime.datetime.now()
-    ref = "".join(str(a).replace(" ", "").replace("-", "").split(":")[0:2])
-    return ref
