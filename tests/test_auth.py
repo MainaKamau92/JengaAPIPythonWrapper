@@ -2,8 +2,8 @@ from unittest import mock
 
 from src.jengaapi.auth import JengaAPI
 
-instance = JengaAPI(api_key="Basic XXXX", password="password",
-                    merchant_code="8900124", base_url="uat.jengahq.io")
+instance = JengaAPI(api_key="Basic XXXX", consumer_secret="consumer_secret",
+                    merchant_code="8900124", base_url="https://uat.finserve.africa/")
 
 
 @mock.patch('src.jengaapi.auth.requests.post')

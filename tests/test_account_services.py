@@ -1,106 +1,142 @@
-from datetime import date
 from unittest import mock
 
-from src.jengaapi.account_services import AccountServices
+from src.jengaapi.account_services import account_services
 
-as_instance = AccountServices(token='Bearer XXXXX')
-signature = 'e967CLKebZyLfa73/YYltjW5M4cHoyWeHi/5VDKJ64gOwKBvzHJRqJJrBBc34v2m4jyKkDMBtfRJeFlxbNisMAeBtkw0TRcD2LThFK27EOqLM3m8rQYa+7CJ2FhPhK+iOa4RUY+vTfkRX5JXuqOW7a3GHds8qyPaPe19cKUY33eAJL3upXnGnA3/PEhzjhb0pqk2zCI7aRzvjjVUGwUdT6LO73NVhDSWvGpLEsP0dH/stC5BoTPNNt9nY8yvGUPV7fmaPSIFn68W4L04WgePQdYkmD1UPApGcrl+L2ALY3lPaRfI6/N+0Y3NIWQyLgix+69k7V4EGolqejWdion+9A=='
+signature = 'e967CLKebZyLfa73'
+api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.account_services.requests.get')
-def test_account_balance(mock_get):
-    mock_get.return_value.json.return_value = {
-        "currency": "KES",
-        "balances": [
-            {
-                "amount": "997382.57",
-                "type": "Current"
-            },
-            {
-                "amount": "997382.57",
-                "type": "Available"
-            }
-        ]
+@mock.patch('src.jengaapi.account_services.send_get_request')
+def test_account_balance(send_get_request_mock):
+    response_payload = {
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "balances": [
+                {
+                    "amount": "485678467.54",
+                    "type": "Available"
+                },
+                {
+                    "amount": "485678467.54",
+                    "type": "Current"
+                }
+            ],
+            "currency": "KES"
+        }
     }
-    response = as_instance.account_balance(signature, 'KE', '0123456789077')
-    assert response is not None
+    send_get_request_mock.return_value = response_payload
+    response = account_services.account_balance(signature, api_token, "KE", "1234567890")
+    assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.requests.get')
-def test_account_mini_statement(mock_get):
-    mock_response = {
-        "accountNumber": "0011547896523",
-        "currency": "KES",
-        "balance": 1000,
-        "transactions": [
-            {
-                "chequeNumber": "123456789",
-                "date": "2017-01-01T00:00:00",
-                "description": "EAZZY-FUNDS TRNSF TO A/C XXXXXXXXXXXX",
-                "amount": "100",
-                "type": "Debit"
-            },
-            {
-                "chequeNumber": "123456789",
-                "date": "2017-01-03T00:00:00",
-                "description": "SI ACCOUNT TO ACCOUNT THIRD PA",
-                "amount": "51",
-                "type": "Debit"
-            }
-        ]
-    }
-    mock_get.return_value.json.return_value = mock_response
-    response = as_instance.account_mini_statement('KE', '0011547896523', signature)
-    assert response is not None
-    assert response == mock_response
-
-
-@mock.patch('src.jengaapi.account_services.requests.get')
-def test_account_inquiry_bank_accounts(mock_get):
-    mock_response = {
-        "account": {
-            "number": "0011547896523",
-            "branchCode": "017",
+@mock.patch('src.jengaapi.account_services.send_get_request')
+def test_account_mini_statement(send_get_request_mock):
+    response_payload = {
+        "status": "true",
+        "code": 0,
+        "message": "success",
+        "data": {
+            "accountNumber": "0011547896523",
             "currency": "KES",
-            "status": "Active"
-        },
-        "customer": [
-            {
-                "id": "100200300",
-                "name": "A N.Other",
-                "type": "Retail"
-            }
-        ]
+            "balance": 1000,
+            "transactions": [
+                {
+                    "chequeNumber": None,
+                    "date": "2017-01-01T00:00:00",
+                    "description": "EAZZY-FUNDS TRNSF TO A/C XXXXXXXXXXXX",
+                    "amount": "100",
+                    "type": "Debit"
+                },
+                {
+                    "chequeNumber": None,
+                    "date": "2017-01-03T00:00:00",
+                    "description": "SI ACCOUNT TO ACCOUNT THIRD PA",
+                    "amount": "51",
+                    "type": "Debit"
+                },
+                {
+                    "chequeNumber": None,
+                    "date": "2017-01-05T00:00:00",
+                    "description": "CHARGE FOR OTC ECS TRAN",
+                    "amount": "220",
+                    "type": "Debit"
+                },
+                {
+                    "chequeNumber": None,
+                    "date": "2017-01-05T00:00:00",
+                    "description": "SI ACCOUNT TO ACCOUNT THIRD PA",
+                    "amount": "20",
+                    "type": "Debit"
+                }
+            ]
+        }
     }
-    mock_get.return_value.json.return_value = mock_response
-    response = as_instance.account_inquiry_bank_accounts('KE', '0011547896523', signature)
-    assert response is not None
-    assert response == mock_response
+    send_get_request_mock.return_value = response_payload
+    response = account_services.account_mini_statement(signature, api_token, "KE", "1234567890")
+    assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.requests.post')
-def test_opening_closing_account_balance(mock_post):
-    mock_response = {
-        "balances": [
-            {
-                "type": "Closing Balance",
-                "amount": "10810.00"
+@mock.patch('src.jengaapi.account_services.send_get_request')
+def test_account_inquiry_bank_accounts(send_get_request_mock):
+    response_payload = {
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "account": {
+                "branchCode": "145",
+                "number": "1450160649886",
+                "currency": "KES",
+                "status": "Active"
             },
-            {
-                "type": "Opening Balance",
-                "amount": "103.00"
-            }
-        ]
+            "customer": [
+                {
+                    "name": "CATHERINE MURANDITSI MUKABWA",
+                    "id": "54307789658",
+                    "type": "Retail"
+                }
+            ]
+        }
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = as_instance.opening_closing_account_balance('KE', '0011547896523', signature)
-    assert response is not None
-    assert response == mock_response
+    send_get_request_mock.return_value = response_payload
+    response = account_services.account_inquiry_bank_accounts(signature, api_token, "KE", "1234567890")
+    assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.requests.post')
-def test_account_full_statement(mock_post):
-    mock_response = {
+@mock.patch('src.jengaapi.account_services.send_post_request')
+def test_opening_closing_account_balance(send_get_request_mock):
+    response_payload = {
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "balances": [
+                {
+                    "amount": "0",
+                    "type": "Closing Balance"
+                },
+                {
+                    "amount": "0",
+                    "type": "Opening Balance"
+                }
+            ]
+        }
+    }
+    payload = {
+        "countryCode": "KE",
+        "accountId": "0011547896523",
+        "date": "2018-08-18"
+    }
+    send_get_request_mock.return_value = response_payload
+    response = account_services.opening_closing_account_balance(signature, api_token, **payload)
+    assert response == response_payload
+
+
+@mock.patch('src.jengaapi.account_services.send_post_request')
+def test_account_full_statement(send_get_request_mock):
+    response_payload = {
         "accountNumber": "0011547896523",
         "currency": "KES",
         "balance": 997382.57,
@@ -146,9 +182,13 @@ def test_account_full_statement(mock_post):
             }
         ]
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = as_instance.account_full_statement(from_date=date(2018, 7, 1), to_date=date(2018, 7, 30),
-                                                  country_code='KE', account_id='0011547896523',
-                                                  account_no='0011547896523', signature=signature, limit=3)
-    assert response is not None
-    assert response == mock_response
+    payload = {
+        "countryCode": "KE",
+        "accountNumber": "0011547896523",
+        "fromDate": "2018-01-18",
+        "toDate": "2018-04-19",
+        "limit": 3
+    }
+    send_get_request_mock.return_value = response_payload
+    response = account_services.account_full_statement(signature, api_token, **payload)
+    assert response == response_payload
