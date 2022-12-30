@@ -4,6 +4,7 @@ from datetime import datetime
 
 from src.jengaapi.auth import JengaAPI
 from src.jengaapi.exceptions import generate_reference
+from src.jengaapi.receive_money_queries_services import receive_money_queries_service
 from src.jengaapi.receive_money_services import receive_money_service
 from src.jengaapi.send_money_imt_services import send_money_imt_service
 
@@ -33,5 +34,5 @@ api = JengaAPI(API_KEY, CONSUMER_SECRET, MERCHANT_CODE, BASE_URL)
 api_token = api.authorization_token
 data = ("0766000000", ACCOUNT_NUMBER, TRANSFER_AMOUNT, CURRENCY_CODE, REFERENCE_NO)
 signature = api.signature(data)
-res = receive_money_service.bill_validation(signature, api_token, **payload)
+res = receive_money_queries_service.get_all_billers(api_token, 1, 10, "utilities")
 print(res)
