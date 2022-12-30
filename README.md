@@ -8,61 +8,109 @@ A simple python wrapper around the JengaAPI from Equity Bank
 
 Installation
 
-```pip install python-jengaapi```
-
-Before beginning add these two environment variables in your .env file:
-
-- BASE_URL="https://yourbaseurl.io" # if non is provided it defaults to https://uat.jengahq.io/
-- ENVIRONMENT="production"
-
-## SendMoneyService
-
-```pycon
-
-# Initial Setup
->>> from jengaapi.auth import JengaAPI
->>> API = JengaAPI(api_key="Basic TFZXxx", password="EhPPgRx4ZpxDrrznGdm25d", merchant_code="8995674492", base_url="https://uat.jengahq.io/")
->>> token = API.authorization_token
-
->>> from jengaapi.send_money_services import SendMoneyService
->>> send_money = SendMoneyService(token=token)
+```
+pip install python-jengaapi
 ```
 
-#### Send within equity
-
-```pycon
-# Generate signature by calling API.signature and passing the relevant tuple (the contents of this tuple are relative based on the request)
-# e.g to generate signature for 
-## generate signature for sending money within equity 
->>> signature = API.signature((source_account_number, transfer_amount,currency_code, reference_no))
->>> send_money.send_within_equity(signature, country_code="KE", source_name="John Doe", source_account_number="0770194201783", destination_account_number="0340197385508",destination_name="Jane Doe", transfer_amount="2300.00", currency_code="KES", reference_no="202108211617", transfer_date=date.today(), description="Send Money")
-{'transactionId': '202108211618', 'status': 'SUCCESS'}
+A sample of the `.env` variables required include:
+```
+MERCHANT_CODE=1234567
+CONSUMER_SECRET=XXXXXXXXXXXXX
+API_KEY=123XXX222
+ACCOUNT_NAME=John Doe
+ACCOUNT_NUMBER=12345678
+CURRENCY_CODE=KES
+COUNTRY_CODE=KE
+FOREIGN_CURRENCY_CODE=USD
+PRIVATE_KEY_PATH=path_to_privatekey.pem
 ```
 
-#### Send to mobile wallets
-
+### ACCOUNT SERVICES
+#### Account Balance
+This web service enables an application or service retrieve the current and available balance of an account:
 ```pycon
->>> signature = API.signature((source_account_number, transfer_amount, currency_code, reference_no))
->>> send_money.send_to_mobile_wallets(signature, wallet_name="Equitel", destination_mobile_number="0763659874", country_code="KE", source_name="John Doe", source_account_number="0770194201783", destination_account_number="0340197385508",destination_name="Jane Doe", transfer_amount="2300.00", currency_code="KES", reference_no="162955567473", transfer_date=date.today(), description="Send Money")
-{'transactionId': '162955567473', 'status': 'SUCCESS'}
+# script.py
+import os
+from jengaapi.auth import JengaAPI
+from jengaapi.account_services import account_services
+
+# Get the environment variables
+MERCHANT_CODE = os.getenv('MERCHANT_CODE')
+CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
+COUNTRY_CODE = os.getenv('COUNTRY_CODE')
+ACCOUNT_NUMBER = os.getenv('ACCOUNT_NUMBER')
+
+# Initialize the JengaAPI class
+api = JengaAPI(CONSUMER_SECRET, MERCHANT_CODE)
+api_token = api.authorization_token
+signature_data = (COUNTRY_CODE, ACCOUNT_NUMBER)
+signature = api.signature(signature_data)
+
+response = account_services.account_balance(
+    signature=signature,
+    api_token=api_token,
+    country_code=COUNTRY_CODE,
+    account_id=ACCOUNT_NUMBER
+)
+print(response)
+```
+```shell
+$ python script.py
+{'status': True, 'code': 0, 'message': 'success', 'data': {'balances': [{'amount': '485657113.54', 'type': 'Available'}, {'amount': '485657113.54', 'type': 'Current'}], 'currency': 'KES'}}
 ```
 
-#### Send RTGS
-
+#### Account MINI Statement
+This service will return the last (10) ten transactions of a given account number.
+It's a super efficient service compared to the fullstatement web service.
 ```pycon
->>> signature = API.signature((reference_no, transfer_date.strftime("%Y-%m-%d"), source_account_number, destination_account_number, transfer_amount))
->>> send_money.send_rtgs(signature, destination_account_number="0340197385508", bank_code="01", country_code="KE", source_name="John Doe", source_account_number="0770194201783", destination_name="Jane Doe", transfer_amount="1500.00", currency_code="KES", reference_no="162955622013", transfer_date=date.today(), description="Send Money")
-{'transactionId': '000002399997', 'status': 'SUCCESS'}
+signature_data = (COUNTRY_CODE, ACCOUNT_NUMBER)
+signature = api.signature(signature_data)
+
+response = account_services.account_mini_statement(
+    signature=signature,
+    api_token=api_token,
+    country_code=COUNTRY_CODE,
+    account_id=ACCOUNT_NUMBER
+)
+print(response)
+```
+```shell
+$ python script.py
+{'status': True, 'code': 0, 'message': 'success', 'data': {'balance': 485432544.0, 'currency': 'KES', 'accountNumber': '1450160649886', 'transactions': [{'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672439264275530', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672439264275530', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672438677873258', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672438677873258', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672438010400777', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672438010400777', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672437798372104', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672437798372104', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672437574565510', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672437574565510', 'chequeNumber': None, 'type': 'Debit'}]}}
 ```
 
-#### Send Swift
-
+### SEND MONEY SERVICES
+#### RTGS 
 ```pycon
->>> signature = API.signature((reference_no, transfer_date.strftime("%Y-%m-%d"), source_account_number, destination_account_number, transfer_amount))
->>> send_money.send_rtgs(signature, destination_account_number="0340197385508", bank_code="01", country_code="KE", source_name="John Doe", source_account_number="0770194201783", destination_name="Jane Doe", transfer_amount="1500.00", currency_code="KES", reference_no="162955622013", transfer_date=date.today(), description="Send Money")
-{'transactionId': '000002399997', 'status': 'SUCCESS'}
+data = ("922651940124", "2022-12-30", ACCOUNT_NUMBER, "0250163591202", "1000.00")
+signature = api.signature(data)
+payload = {
+    "source": {
+        "countryCode": "KES",
+        "name": "John Doe",
+        "currency": "KES",
+        "accountNumber": ACCOUNT_NUMBER
+    },
+    "destination": {
+        "type": "bank",
+        "countryCode": "KE",
+        "name": "Tom Doe",
+        "bankCode": "01",
+        "accountNumber": "0250163591202"
+    },
+    "transfer": {
+        "type": "RTGS",
+        "amount": "1000.00",
+        "currencyCode": "KES",
+        "reference": "922651940124",
+        "date": "2022-12-30",
+        "description": "some remarks here"
+    }
+}
+res = send_money_service.send_rtgs(signature, api_token, **payload)
+print(res)
 ```
-
-## To All Users
-
-> This is the very first release of the package and despite most of the functionality already tested during development, a few bugs are expected. Feel free to create an issue and tag me and i'll get on it ASAP
+```shell
+$ python script.py
+{"transactionId": "000000403777", "status": "SUCCESS"}
+```
