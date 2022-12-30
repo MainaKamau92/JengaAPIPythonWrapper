@@ -1,164 +1,224 @@
-from datetime import date
 from unittest import mock
 
-from src.jengaapi.send_money_services import SendMoneyService
+from src.jengaapi.send_money_services import send_money_service
 
-instance = SendMoneyService(token="Bearer XXXX")
+signature = 'e967CLKebZyLfa73'
+api_token = 'Bearer e967CLKebZyLfa73'
 
-signature = b'e967CLKebZyLfa73/YYltjW5M4cHoyWeHi/5VDKJ64gOwKBvzHJRqJJrBBc34v2m4jyKkDMBtfRJeFlxbNisMAeBtkw0TRcD2LThFK27EOqLM3m8rQYa+7CJ2FhPhK+iOa4RUY+vTfkRX5JXuqOW7a3GHds8qyPaPe19cKUY33eAJL3upXnGnA3/PEhzjhb0pqk2zCI7aRzvjjVUGwUdT6LO73NVhDSWvGpLEsP0dH/stC5BoTPNNt9nY8yvGUPV7fmaPSIFn68W4L04WgePQdYkmD1UPApGcrl+L2ALY3lPaRfI6/N+0Y3NIWQyLgix+69k7V4EGolqejWdion+9A=='
 
-
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_within_equity(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_within_equity(send_post_request_mock):
     mock_response = {
-        "transactionId": "1452854",
-        "status": "SUCCESS"
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "transactionId": "54154",
+            "status": "SUCCESS"
+        }
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_within_equity(signature, destination_account_number="0022547896523",
-                                           country_code="KE",
-                                           source_name="A N.Other",
-                                           source_account_number="0011547896523",
-                                           destination_name="John Doe",
-                                           transfer_amount="1000.00",
-                                           currency_code="KES",
-                                           reference_no="692194625798",
-                                           transfer_date=date.today(),
-                                           description="some remarks here")
-    assert response is not None
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "bank",
+            "countryCode": "KE",
+            "name": "Tom Doe",
+            "accountNumber": "0060161911111"
+        },
+        "transfer": {
+            "type": "InternalFundsTransfer",
+            "amount": "100.00",
+            "currencyCode": "KES",
+            "reference": "742194625798",
+            "date": "2019-05-01",
+            "description": "Some remarks here"
+        }
+    }
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_within_equity(signature, api_token, **payload)
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_to_mobile_wallets(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_to_mobile_wallets(send_post_request_mock):
     mock_response = {
-        "transactionId": "45865",
-        "status": "SUCCESS"
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "transactionId": "",
+            "status": "SUCCESS"
+        }
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_to_mobile_wallets(signature, wallet_name="Equitel",
-                                               destination_mobile_number="0763123456",
-                                               country_code="KE",
-                                               source_name="John Doe",
-                                               source_account_number="0011547896523",
-                                               destination_name="A N.Other",
-                                               transfer_amount="1000.00",
-                                               currency_code="KES",
-                                               reference_no="692194625798",
-                                               transfer_date=date.today(),
-                                               description="some remarks here")
-    assert response is not None
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "mobile",
+            "countryCode": "KE",
+            "name": "A N.Other",
+            "mobileNumber": "0763123456",
+            "walletName": "Mpesa"
+        },
+        "transfer": {
+            "type": "MobileWallet",
+            "amount": "1000",
+            "currencyCode": "KES",
+            "date": "2018-08-18",
+            "description": "some remarks here"
+        }
+    }
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_to_mobile_wallets(signature, api_token, **payload)
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_rtgs(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_rtgs(send_post_request_mock):
     mock_response = {
         "transactionId": "000000403777",
         "status": "SUCCESS"
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_rtgs(signature, destination_account_number="2564785123", bank_code="01",
-                                  country_code="KE",
-                                  source_name="John Doe",
-                                  source_account_number="0011547896523",
-                                  destination_name="A N.Other",
-                                  transfer_amount="1000.00",
-                                  currency_code="KES",
-                                  reference_no="692194625798",
-                                  transfer_date=date.today(),
-                                  description="some remarks here")
-    assert response is not None
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "bank",
+            "countryCode": "KE",
+            "name": "Tom Doe",
+            "bankCode": "70",
+            "accountNumber": "12365489"
+        },
+        "transfer": {
+            "type": "RTGS",
+            "amount": "4.00",
+            "currencyCode": "KES",
+            "reference": "692194625798",
+            "date": "2019-05-01",
+            "description": "Some remarks here"
+        }
+    }
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_rtgs(signature, api_token, **payload)
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_swift(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_swift(send_post_request_mock):
     mock_response = {
         "transactionId": "000000403794",
         "status": "SUCCESS"
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_swift(signature, destination_account_number="12365489",
-                                   bank_bic="BOTKJPJTXXX",
-                                   address_line="Post Box 56",
-                                   charge_option="SELF",
-                                   country_code="KE",
-                                   source_name="John Doe",
-                                   source_account_number="0011547896523",
-                                   destination_name="A N.Other",
-                                   transfer_amount="10000.00",
-                                   currency_code="USD",
-                                   reference_no="692194625798",
-                                   transfer_date=date.today(),
-                                   description="some description here")
-    assert response is not None
-    assert response == mock_response
-
-
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_eft(mock_post):
-    mock_response = {
-        "transactionId": "000000403794",
-        "status": "SUCCESS"
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "bank",
+            "countryCode": "JP",
+            "name": "Tom Doe",
+            "bankBic": "BOTKJPJTXXX",
+            "accountNumber": "12365489",
+            "addressline1": "Post Box 56"
+        },
+        "transfer": {
+            "type": "SWIFT",
+            "amount": "4.00",
+            "currencyCode": "USD",
+            "reference": "692194625798",
+            "date": "2019-05-01",
+            "description": "Some remarks here",
+            "chargeOption": "SELF"
+        }
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_eft(signature, destination_account_number="54545454",
-                                 bank_code="01", branch_code="112",
-                                 country_code="KE",
-                                 source_name="John Doe",
-                                 source_account_number="0011547896523",
-                                 destination_name="A N.Other",
-                                 transfer_amount="10000.00",
-                                 currency_code="USD",
-                                 reference_no="692194625798",
-                                 transfer_date=date.today(),
-                                 description="some description here")
-    assert response is not None
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_swift(signature, api_token, **payload)
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_pesalink_to_bank_account(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_pesa_link_to_bank_account(send_post_request_mock):
     mock_response = {
         "transactionId": "10000345333355",
         "status": "SUCCESS",
-        "description": "Confirmed. Ksh 100 Sent to 01100762802910 -Tom Doe from your account 1460163242696 on "
-                       "20-05-2019 at 141313 Ref. 707700078800 Thank you "
+        "description": "Confirmed. Ksh 100 Sent to 01100762802910 "
+                       "-Tom Doe from your account 1460163242696 on 20-05-2019 "
+                       "at 141313 Ref. 707700078800 Thank you"
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_pesalink_to_bank_account(signature, destination_account_number="8323524545",
-                                                      bank_code="01",
-                                                      mobile_number="0722000000",
-                                                      country_code="KE",
-                                                      source_name="John Doe",
-                                                      source_account_number="0011547896523",
-                                                      destination_name="A N.Other",
-                                                      transfer_amount="10000.00",
-                                                      currency_code="USD",
-                                                      reference_no="692194625798",
-                                                      transfer_date=date.today(),
-                                                      description="some description here")
-    assert response is not None
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "bank",
+            "countryCode": "KE",
+            "name": "Tom Doe",
+            "bankCode": "63",
+            "accountNumber": "0090207635001"
+        },
+        "transfer": {
+            "type": "PesaLink",
+            "amount": "4.00",
+            "currencyCode": "KES",
+            "reference": "692194625798",
+            "date": "2019-05-01",
+            "description": "Some remarks here"
+        }
+    }
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_pesa_link_to_bank_account(signature, api_token, **payload)
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.requests.post')
-def test_send_pesalink_to_mobile_number(mock_post):
+@mock.patch('src.jengaapi.send_money_services.send_post_request')
+def test_send_pesa_link_to_mobile_number(send_post_request_mock):
     mock_response = {
-        "transactionId": "10000345333355",
-        "status": "SUCCESS"
+        "status": True,
+        "code": 0,
+        "message": "success",
+        "data": {
+            "description": "Confirmed. Ksh 100.0 sent to 254764000000- "
+                           "John Doe from your account 1464968850106 "
+                           "on Fri Jun 24 11:07:02 EAT 2022. Ref 041108128674. Thank you",
+            "transactionId": "041108128674",
+            "status": "SUCCESS"
+        }
     }
-    mock_post.return_value.json.return_value = mock_response
-    response = instance.send_pesalink_to_mobile_number(signature, destination_mobile_number="0722000000",
-                                                       bank_code="01", country_code="KE",
-                                                       source_name="John Doe",
-                                                       source_account_number="0011547896523",
-                                                       destination_name="A N.Other",
-                                                       transfer_amount="10000.00",
-                                                       currency_code="USD",
-                                                       reference_no="692194625798",
-                                                       transfer_date=date.today(),
-                                                       description="some description here")
-    assert response is not None
+    payload = {
+        "source": {
+            "countryCode": "KE",
+            "name": "John Doe",
+            "accountNumber": "0011547896523"
+        },
+        "destination": {
+            "type": "mobile",
+            "countryCode": "KE",
+            "name": "A N.Other",
+            "bankCode": "01",
+            "mobileNumber": "0722000000"
+        },
+        "transfer": {
+            "type": "PesaLink",
+            "amount": "1000",
+            "currencyCode": "KES",
+            "reference": "692194625798",
+            "date": "2018-08-19"
+        }
+    }
+    send_post_request_mock.return_value = mock_response
+    response = send_money_service.send_pesa_link_to_mobile_number(signature, api_token, **payload)
     assert response == mock_response

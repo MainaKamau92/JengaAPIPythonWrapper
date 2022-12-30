@@ -12,11 +12,11 @@ from .utils import get_project_root
 
 
 class JengaAPI:
-    def __init__(self, api_key, password, merchant_code, base_url,
+    def __init__(self, api_key, consumer_secret, merchant_code, base_url,
                  path_to_private_key=os.path.join(get_project_root(), "privatekey.pem")):
         self.api_key = api_key
-        self._username = merchant_code
-        self._password = password
+        self._merchant_code = merchant_code
+        self._consumer_secret = consumer_secret
         self.base_url = base_url
         self.private_key = path_to_private_key if ENVIRONMENT != "testing" else os.path.join(get_project_root(),
                                                                                              "tests/testkey.pem")
@@ -24,12 +24,18 @@ class JengaAPI:
 
     @property
     def authorization_token(self):
-        url = self.base_url + "/identity/v2/token"
-        headers = {"Authorization": self.api_key}
-        body = dict(username=self._username, password=self._password)
-        response = requests.post(url, headers=headers, data=body)
+        url = self.base_url + "authentication/api/v3/authenticate/merchant"
+        payload = {
+            "merchantCode": self._merchant_code,
+            "consumerSecret": self._consumer_secret
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Api-Key": self.api_key
+        }
+        response = requests.post(url, json=payload, headers=headers)
         _response = handle_response(response)
-        token = "Bearer " + _response.get("access_token")
+        token = "Bearer " + _response.get("accessToken")
         return token
 
     def signature(self, request_hash_fields: tuple):

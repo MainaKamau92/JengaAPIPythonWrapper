@@ -1,13 +1,14 @@
 from unittest import mock
 
-from src.jengaapi.receive_money_queries_services import ReceiveMoneyQueriesService
+from src.jengaapi.receive_money_queries_services import receive_money_queries_service
 
-rms_instance = ReceiveMoneyQueriesService(token="Bearer e.123xxxxxx")
+signature = 'e967CLKebZyLfa73'
+api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.requests.get')
-def test_get_all_eazzypay_merchants(mock_get):
-    mock_response = {
+@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+def test_get_all_eazzy_pay_merchants(send_get_request_mock):
+    response_payload = {
         "merchants": [
             {
                 "name": "Nakumatt",
@@ -25,28 +26,26 @@ def test_get_all_eazzypay_merchants(mock_get):
             }
         ]
     }
-    mock_get.return_value.json.return_value = mock_response
-    response = rms_instance.get_all_eazzy_pay_merchants(1, 1)
-    assert response is not None
-    assert response == mock_response
+    send_get_request_mock.return_value = response_payload
+    response = receive_money_queries_service.get_all_eazzy_pay_merchants(api_token, 1, 1)
+    assert response == response_payload
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.requests.get')
-def test_get_payment_status_eazzy_pay_push(mock_get):
-    mock_response = {
+@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+def test_query_transaction_details(send_get_request_mock):
+    response_payload = {
         "transactionRef": "692194625798",
         "status": "0",
         "message": "Transaction approved successfully."
     }
-    mock_get.return_value.json.return_value = mock_response
-    response = rms_instance.get_payment_status_eazzy_pay_push('692194625798')
-    assert response is not None
-    assert response == mock_response
+    send_get_request_mock.return_value = response_payload
+    response = receive_money_queries_service.query_transaction_details(api_token, "692194625798")
+    assert response == response_payload
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.requests.get')
-def test_get_all_billers(mock_get):
-    mock_response = {
+@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+def test_get_all_billers(send_get_request_mock):
+    response_payload = {
         "billers": [
             {
                 "name": "test biller",
@@ -70,7 +69,6 @@ def test_get_all_billers(mock_get):
             }
         ]
     }
-    mock_get.return_value.json.return_value = mock_response
-    response = rms_instance.get_all_billers(5, 1)
-    assert response is not None
-    assert response == mock_response
+    send_get_request_mock.return_value = response_payload
+    response = receive_money_queries_service.get_all_billers(api_token, 1, 5, "utilities")
+    assert response == response_payload

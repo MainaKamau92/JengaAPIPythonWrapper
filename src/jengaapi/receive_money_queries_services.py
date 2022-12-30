@@ -1,38 +1,27 @@
-import requests
-
 from . import BASE_URL
-from .exceptions import handle_response
+from .utils import prepare_request_header, send_get_request
 
 
 class ReceiveMoneyQueriesService:
+    service_url = f'{BASE_URL}v3-apis/transaction-api/v3.0/'
 
-    def __init__(self, token):
-        self.token = token
-        self.headers = {
-            'Content-Type': 'application/json',
-            'Authorization': self.token
-        }
+    @classmethod
+    def get_all_eazzy_pay_merchants(cls, api_token: str, page: int = 1, per_page: int = 1):
+        headers = prepare_request_header(None, api_token)
+        url = f"{cls.service_url}merchants?page={page}&per_page={per_page}"
+        return send_get_request(headers=headers, url=url)
 
-    def get_all_eazzy_pay_merchants(self, per_page, page):
-        url = BASE_URL + f'transaction/v2/merchants?per_page={per_page}&page={page}'
-        response = requests.get(url, headers=self.headers)
-        formatted_response = handle_response(response)
-        return formatted_response
+    @classmethod
+    def query_transaction_details(cls, api_token: str, ref: str):
+        headers = prepare_request_header(None, api_token)
+        url = f"{cls.service_url}payments/details/{ref}"
+        return send_get_request(headers=headers, url=url)
 
-    def get_payment_status_eazzy_pay_push(self, transaction_ref):
-        url = BASE_URL + f'transaction/v2/payments/{transaction_ref}'
-        response = requests.get(url, headers=self.headers)
-        formatted_response = handle_response(response)
-        return formatted_response
+    @classmethod
+    def get_all_billers(cls, api_token: str, page: int = 1, per_page: int = 1, category: str = None):
+        headers = prepare_request_header(None, api_token)
+        url = f"{cls.service_url}billers?page={page}&per_page={per_page}&category={category}"
+        return send_get_request(headers=headers, url=url)
 
-    def query_transaction_details(self, payments_ref):
-        url = BASE_URL + f'transaction/v2/payments/details/{payments_ref}'
-        response = requests.get(url, headers=self.headers)
-        formatted_response = handle_response(response)
-        return formatted_response
 
-    def get_all_billers(self, per_page, page):
-        url = BASE_URL + f'transaction/v2/billers?per_page={per_page}&page={page}'
-        response = requests.get(url, headers=self.headers)
-        formatted_response = handle_response(response)
-        return formatted_response
+receive_money_queries_service = ReceiveMoneyQueriesService()
