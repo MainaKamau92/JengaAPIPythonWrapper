@@ -1,15 +1,20 @@
 import datetime
 from json import JSONDecodeError
-from pathlib import Path
 from typing import Union
 
 import requests
+from requests import Response
 
-from .exceptions import handle_response
 
-
-def get_project_root() -> Path:
-    return Path(__file__).parent.parent.parent
+def handle_response(response: Response) -> Union[dict, JSONDecodeError]:
+    """
+    Handles Responses From the JengaHQ API and Raises Exceptions appropriately
+    as errors occur and returns a `dict` object from the `json` response
+    """
+    try:
+        return response.json()
+    except JSONDecodeError as e:
+        raise ("An error occurred decoding the JSON response" + str(e))
 
 
 def prepare_request_header(signature: Union[None, str], token: str) -> dict:
@@ -41,7 +46,5 @@ def generate_reference() -> str:
     Generate a transaction reference
     Should always be a 12 digit String
     """
-
     a = datetime.datetime.now()
-    ref = "".join(str(a).replace(" ", "").replace("-", "").split(":")[0:2])
-    return ref
+    return "".join(str(a).replace(" ", "").replace("-", "").split(":")[0:2])

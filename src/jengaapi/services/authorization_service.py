@@ -4,26 +4,28 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-from . import ENVIRONMENT, BASE_URL, PRIVATE_KEY_PATH, TESTING_PRIVATE_KEY_PATH, API_KEY
 from .utils import send_post_request
+from ..configs.config import Config
 
 
-class JengaAPI:
-    def __init__(self, consumer_secret, merchant_code):
-        self._merchant_code = merchant_code
-        self._consumer_secret = consumer_secret
-        self.private_key = PRIVATE_KEY_PATH if ENVIRONMENT != "testing" else TESTING_PRIVATE_KEY_PATH
+class AuthorizationService:
+    def __init__(self, config: Config):
+        self._merchant_code = config.MERCHANT_CODE
+        self._consumer_secret = config.CONSUMER_SECRET
+        self.private_key = config.PRIVATE_KEY_PATH
+        self.api_key = config.API_KEY
+        self.base_url = config.BASE_URL
 
     @property
-    def authorization_token(self):
-        url = f"{BASE_URL}authentication/api/v3/authenticate/merchant"
+    def auth_token(self):
+        url = f"{self.base_url}authentication/api/v3/authenticate/merchant"
         payload = {
             "merchantCode": self._merchant_code,
             "consumerSecret": self._consumer_secret
         }
         headers = {
             "Content-Type": "application/json",
-            "Api-Key": API_KEY
+            "Api-Key": self.api_key
         }
         response = send_post_request(headers, payload, url)
         return "Bearer " + response.get("accessToken")

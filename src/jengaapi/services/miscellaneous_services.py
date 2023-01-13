@@ -1,11 +1,13 @@
 from typing import Union
 
-from . import BASE_URL
 from .utils import prepare_request_header, send_post_request
+from ..configs.config import Config
 
 
 class MiscellaneousServices:
-    service_url = f'{BASE_URL}v3-apis/'
+
+    def __init__(self, config: Config):
+        self.service_url = f'{config.BASE_URL}v3-apis/'
 
     @classmethod
     def purchase_airtime(cls, signature: str, api_token: str, **payload: dict):
