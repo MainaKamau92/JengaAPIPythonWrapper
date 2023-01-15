@@ -55,10 +55,7 @@ Bearer eexxxxx.xx.xxxxxx
 account_service = AccountServices(config=uat_config)
 # Get account balance
 signature = auth.signature((COUNTRY_CODE, ACCOUNT_NO))
-account_balance = account.account_balance(signature=signature,
-                                           api_token=auth_token,
-                                           country_code=COUNTRY_CODE,
-                                          account_id=ACCOUNT_NO)
+account_balance = account_service.account_balance(signature, auth_token, COUNTRY_CODE, ACCOUNT_NO)
 print(account_balance)
 ```
 ```shell
@@ -86,10 +83,7 @@ $ python script.py
 ```pycon
 account_service = AccountServices(config=uat_config)
 signature = auth.signature((COUNTRY_CODE, ACCOUNT_NO))
-account_mini_statement = account.account_mini_statement(signature=signature,
-                                                        api_token=auth_token,
-                                                        country_code=COUNTRY_CODE,
-                                                        account_id=ACCOUNT_NO)
+account_mini_statement = account_service.account_mini_statement(signature, auth_token, COUNTRY_CODE, ACCOUNT_NO)
 print(account_mini_statement)
 ```
 ```shell
@@ -142,7 +136,7 @@ payload = dict(
     accountId=ACCOUNT_NO,
     date="2023-01-01",
 )
-opening_closing = account.opening_closing_account_balance(ep_signature, auth_token, **payload)
+opening_closing = account_service.opening_closing_account_balance(ep_signature, auth_token, **payload)
 print(opening_closing)
 ```
 ```shell
@@ -190,7 +184,7 @@ payload = {
     }
 }
 ep_signature = auth.signature((ACCOUNT_NO,"1000.00", "KES", "692494625798"))
-send_money_within_equity = send_money.send_within_equity(ep_signature, auth_token, **payload)
+send_money_within_equity = send_money_service.send_within_equity(ep_signature, auth_token, **payload)
 print(send_money_within_equity)
 ```
 ```shell
@@ -228,7 +222,7 @@ payload = {
     }
 }
 ep_signature = auth.signature(("1000", "KES", "692494625799", ACCOUNT_NO))
-send_money_within_equity = send_money.send_to_mobile_wallets(ep_signature, auth_token, **payload)
+send_money_within_equity = send_money_service.send_to_mobile_wallets(ep_signature, auth_token, **payload)
 print(send_money_within_equity)
 ```
 ```shell
@@ -242,3 +236,6 @@ print(send_money_within_equity)
     }
 }
 ```
+
+#### Jenga API docs
+For official documentatio the Equity bank api refer [here](https://developer.jengaapi.io/reference/welcome)
