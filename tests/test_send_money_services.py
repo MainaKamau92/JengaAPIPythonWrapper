@@ -1,12 +1,13 @@
 from unittest import mock
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.send_money_services import SendMoneyService
 
-from src.jengaapi.send_money_services import send_money_service
-
+send_money_service = SendMoneyService(config=app_config.get('testing'))
 signature = 'e967CLKebZyLfa73'
 api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_within_equity(send_post_request_mock):
     mock_response = {
         "status": True,
@@ -43,7 +44,7 @@ def test_send_within_equity(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_to_mobile_wallets(send_post_request_mock):
     mock_response = {
         "status": True,
@@ -80,7 +81,7 @@ def test_send_to_mobile_wallets(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_rtgs(send_post_request_mock):
     mock_response = {
         "transactionId": "000000403777",
@@ -113,7 +114,7 @@ def test_send_rtgs(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_swift(send_post_request_mock):
     mock_response = {
         "transactionId": "000000403794",
@@ -148,7 +149,7 @@ def test_send_swift(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_pesa_link_to_bank_account(send_post_request_mock):
     mock_response = {
         "transactionId": "10000345333355",
@@ -184,7 +185,7 @@ def test_send_pesa_link_to_bank_account(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.send_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.send_money_services.send_post_request')
 def test_send_pesa_link_to_mobile_number(send_post_request_mock):
     mock_response = {
         "status": True,

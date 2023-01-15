@@ -1,12 +1,14 @@
 from unittest import mock
 
-from src.jengaapi.account_services import account_services
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.account_services import AccountServices
 
+account_services = AccountServices(config=app_config.get('testing'))
 signature = 'e967CLKebZyLfa73'
 api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.account_services.send_get_request')
+@mock.patch('src.jengaapi.services.account_services.send_get_request')
 def test_account_balance(send_get_request_mock):
     response_payload = {
         "status": True,
@@ -31,7 +33,7 @@ def test_account_balance(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.send_get_request')
+@mock.patch('src.jengaapi.services.account_services.send_get_request')
 def test_account_mini_statement(send_get_request_mock):
     response_payload = {
         "status": "true",
@@ -78,7 +80,7 @@ def test_account_mini_statement(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.send_get_request')
+@mock.patch('src.jengaapi.services.account_services.send_get_request')
 def test_account_inquiry_bank_accounts(send_get_request_mock):
     response_payload = {
         "status": True,
@@ -105,7 +107,7 @@ def test_account_inquiry_bank_accounts(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.send_post_request')
+@mock.patch('src.jengaapi.services.account_services.send_post_request')
 def test_opening_closing_account_balance(send_get_request_mock):
     response_payload = {
         "status": True,
@@ -134,7 +136,7 @@ def test_opening_closing_account_balance(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.account_services.send_post_request')
+@mock.patch('src.jengaapi.services.account_services.send_post_request')
 def test_account_full_statement(send_get_request_mock):
     response_payload = {
         "accountNumber": "0011547896523",

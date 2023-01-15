@@ -1,12 +1,13 @@
 from unittest import mock
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.receive_money_services import ReceiveMoneyService
 
-from src.jengaapi.receive_money_services import receive_money_service
-
+receive_money_service = ReceiveMoneyService(config=app_config.get('testing'))
 signature = 'e967CLKebZyLfa73'
 api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.receive_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.receive_money_services.send_post_request')
 def test_receive_payments_bill_payments(send_post_request_mock):
     mock_response = {
         "referenceNumber": "692194625798",
@@ -35,7 +36,7 @@ def test_receive_payments_bill_payments(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.receive_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.receive_money_services.send_post_request')
 def test_receive_payments_merchant_payments(send_post_request_mock):
     mock_response = {
         "status": "SUCCESS",
@@ -59,7 +60,7 @@ def test_receive_payments_merchant_payments(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.receive_money_services.send_post_request')
+@mock.patch('src.jengaapi.services.receive_money_services.send_post_request')
 def test_bill_validation(send_post_request_mock):
     mock_response = {
         "status": True,
