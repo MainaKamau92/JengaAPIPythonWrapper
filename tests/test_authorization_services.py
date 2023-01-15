@@ -1,11 +1,12 @@
 from unittest import mock
 
-from src.jengaapi.auth import JengaAPI
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.authorization_service import AuthorizationService
 
-instance = JengaAPI(consumer_secret="consumer_secret", merchant_code="8900124")
+authorization_services = AuthorizationService(config=app_config.get('testing'))
 
 
-@mock.patch('src.jengaapi.auth.send_post_request')
+@mock.patch('src.jengaapi.services.authorization_service.send_post_request')
 def test_authorization_token(send_post_request_mock):
     send_post_request_mock.return_value = {
         "accessToken": "exxxxxxxx",
@@ -14,11 +15,12 @@ def test_authorization_token(send_post_request_mock):
         "issuedAt": "2022-12-30T12:57:27Z",
         "tokenType": "Bearer"
     }
-    response = instance.authorization_token
+    response = authorization_services.auth_token
     assert response is not None
     assert response == 'Bearer exxxxxxxx'
 
 
 def test_signature_generation():
-    response = instance.signature(('0011547896523', 'KE', '2018-08-09'))
+    request_hash_fields = ('0011547896523', 'KE', '2018-08-09')
+    response = authorization_services.signature(request_hash_fields)
     assert response is not None

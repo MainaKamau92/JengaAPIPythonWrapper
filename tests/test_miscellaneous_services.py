@@ -1,12 +1,13 @@
 from unittest import mock
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.miscellaneous_services import MiscellaneousServices
 
-from src.jengaapi.miscellaneous_services import miscellaneous_services
-
+miscellaneous_services = MiscellaneousServices(config=app_config.get('testing'))
 signature = 'e967CLKebZyLfa73'
 api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.miscellaneous_services.send_post_request')
+@mock.patch('src.jengaapi.services.miscellaneous_services.send_post_request')
 def test_purchase_airtime(send_post_request_mock):
     mock_response = {
         "status": True,
@@ -33,7 +34,7 @@ def test_purchase_airtime(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.miscellaneous_services.send_post_request')
+@mock.patch('src.jengaapi.services.miscellaneous_services.send_post_request')
 def test_get_forex_rates(send_post_request_mock):
     mock_response = {
         "status": True,
@@ -57,7 +58,7 @@ def test_get_forex_rates(send_post_request_mock):
     assert response == mock_response
 
 
-@mock.patch('src.jengaapi.miscellaneous_services.send_post_request')
+@mock.patch('src.jengaapi.services.miscellaneous_services.send_post_request')
 def test_kyc(send_post_request_mock):
     mock_response = {
         "status": True,

@@ -1,12 +1,14 @@
 from unittest import mock
+from src.jengaapi.configs.config import app_config
+from src.jengaapi.services.receive_money_queries_services import ReceiveMoneyQueriesService
 
-from src.jengaapi.receive_money_queries_services import receive_money_queries_service
 
+receive_money_queries_service = ReceiveMoneyQueriesService(config=app_config.get('testing'))
 signature = 'e967CLKebZyLfa73'
 api_token = 'Bearer e967CLKebZyLfa73'
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+@mock.patch('src.jengaapi.services.receive_money_queries_services.send_get_request')
 def test_get_all_eazzy_pay_merchants(send_get_request_mock):
     response_payload = {
         "merchants": [
@@ -31,7 +33,7 @@ def test_get_all_eazzy_pay_merchants(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+@mock.patch('src.jengaapi.services.receive_money_queries_services.send_get_request')
 def test_query_transaction_details(send_get_request_mock):
     response_payload = {
         "transactionRef": "692194625798",
@@ -43,7 +45,7 @@ def test_query_transaction_details(send_get_request_mock):
     assert response == response_payload
 
 
-@mock.patch('src.jengaapi.receive_money_queries_services.send_get_request')
+@mock.patch('src.jengaapi.services.receive_money_queries_services.send_get_request')
 def test_get_all_billers(send_get_request_mock):
     response_payload = {
         "billers": [
