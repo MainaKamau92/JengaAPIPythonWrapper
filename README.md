@@ -25,92 +25,220 @@ FOREIGN_CURRENCY_CODE=USD
 PRIVATE_KEY_PATH=path_to_privatekey.pem
 ```
 
-### ACCOUNT SERVICES
-#### Account Balance
-This web service enables an application or service retrieve the current and available balance of an account:
+### Authorization Service
+#### Fetch Authorization token
 ```pycon
 # script.py
-import os
-from jengaapi.auth import JengaAPI
-from jengaapi.account_services import account_services
+from jengaapi.configs.config import app_config
+from jengaapi.services.authorization_service import AuthorizationService
+
+uat_config = app_config.get('uat')
 
 # Get the environment variables
-MERCHANT_CODE = os.getenv('MERCHANT_CODE')
-CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
+MERCHANT_CODE = uat_config.MERCHANT_CODE
+CONSUMER_SECRET = uat_config.CONSUMER_SECRET
 COUNTRY_CODE = os.getenv('COUNTRY_CODE')
 ACCOUNT_NUMBER = os.getenv('ACCOUNT_NUMBER')
 
-# Initialize the JengaAPI class
-api = JengaAPI(CONSUMER_SECRET, MERCHANT_CODE)
-api_token = api.authorization_token
-signature_data = (COUNTRY_CODE, ACCOUNT_NUMBER)
-signature = api.signature(signature_data)
 
-response = account_services.account_balance(
-    signature=signature,
-    api_token=api_token,
-    country_code=COUNTRY_CODE,
-    account_id=ACCOUNT_NUMBER
-)
-print(response)
+auth = AuthorizationService(config=uat_config)
+auth_token = auth.auth_token
+print(auth_token)
 ```
 ```shell
 $ python script.py
-{'status': True, 'code': 0, 'message': 'success', 'data': {'balances': [{'amount': '485657113.54', 'type': 'Available'}, {'amount': '485657113.54', 'type': 'Current'}], 'currency': 'KES'}}
+Bearer eexxxxx.xx.xxxxxx
 ```
-
-#### Account MINI Statement
-This service will return the last (10) ten transactions of a given account number.
-It's a super efficient service compared to the fullstatement web service.
+## Account Service
+#### Fetch Account Balance
 ```pycon
-signature_data = (COUNTRY_CODE, ACCOUNT_NUMBER)
-signature = api.signature(signature_data)
-
-response = account_services.account_mini_statement(
-    signature=signature,
-    api_token=api_token,
-    country_code=COUNTRY_CODE,
-    account_id=ACCOUNT_NUMBER
-)
-print(response)
+account_service = AccountServices(config=uat_config)
+# Get account balance
+signature = auth.signature((COUNTRY_CODE, ACCOUNT_NO))
+account_balance = account.account_balance(signature=signature,
+                                           api_token=auth_token,
+                                           country_code=COUNTRY_CODE,
+                                          account_id=ACCOUNT_NO)
+print(account_balance)
 ```
 ```shell
 $ python script.py
-{'status': True, 'code': 0, 'message': 'success', 'data': {'balance': 485432544.0, 'currency': 'KES', 'accountNumber': '1450160649886', 'transactions': [{'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672439264275530', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672439264275530', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672438677873258', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672438677873258', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672438010400777', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672438010400777', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672437798372104', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672437798372104', 'chequeNumber': None, 'type': 'Debit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE CREDIT 672437574565510', 'chequeNumber': None, 'type': 'Credit'}, {'date': '2022-12-30T00:00:00.000', 'amount': '1', 'description': 'JENGA CHARGE DEBIT 672437574565510', 'chequeNumber': None, 'type': 'Debit'}]}}
+{
+   "status":true,
+   "code":0,
+   "message":"success",
+   "data":{
+      "balances":[
+         {
+            "amount":"485115080.54",
+            "type":"Available"
+         },
+         {
+            "amount":"485115080.54",
+            "type":"Current"
+         }
+      ],
+      "currency":"KES"
+   }
+}
 ```
-
-### SEND MONEY SERVICES
-#### RTGS 
+#### Fetch Account Mini Statement
 ```pycon
-data = ("922651940124", "2022-12-30", ACCOUNT_NUMBER, "0250163591202", "1000.00")
-signature = api.signature(data)
+account_service = AccountServices(config=uat_config)
+signature = auth.signature((COUNTRY_CODE, ACCOUNT_NO))
+account_mini_statement = account.account_mini_statement(signature=signature,
+                                                        api_token=auth_token,
+                                                        country_code=COUNTRY_CODE,
+                                                        account_id=ACCOUNT_NO)
+print(account_mini_statement)
+```
+```shell
+{
+   "status":true,
+   "code":0,
+   "message":"success",
+   "data":{
+      "balance":484837600.0,
+      "currency":"KES",
+      "accountNumber":"1450160649886",
+      "transactions":[
+         {
+            "date":"2023-01-12T00:00:00.000",
+            "amount":"1",
+            "description":"JENGA CHARGE CREDIT 673579628084879",
+            "chequeNumber":"None",
+            "type":"Credit"
+         },
+         {
+            "date":"2023-01-12T00:00:00.000",
+            "amount":"1",
+            "description":"JENGA CHARGE DEBIT 673579628084879",
+            "chequeNumber":"None",
+            "type":"Debit"
+         },
+         {
+            "date":"2023-01-12T00:00:00.000",
+            "amount":"1",
+            "description":"JENGA CHARGE CREDIT 673579623845546",
+            "chequeNumber":"None",
+            "type":"Credit"
+         },
+         {
+            "date":"2023-01-12T00:00:00.000",
+            "amount":"1",
+            "description":"REV-(673540528125447)JENGA CHARGE DEBIT 6735405275",
+            "chequeNumber":"None",
+            "type":"Debit"
+         }
+      ]
+   }
+}
+```
+#### Fetch Account Opening and Closing Balance
+```pycon
+ep_signature = auth.signature((ACCOUNT_NO, COUNTRY_CODE, "2023-01-01"))
+payload = dict(
+    countryCode=COUNTRY_CODE,
+    accountId=ACCOUNT_NO,
+    date="2023-01-01",
+)
+opening_closing = account.opening_closing_account_balance(ep_signature, auth_token, **payload)
+print(opening_closing)
+```
+```shell
+{
+   "status":true,
+   "code":0,
+   "message":"success",
+   "data":{
+      "balances":[
+         {
+            "amount":"0",
+            "type":"Closing Balance"
+         },
+         {
+            "amount":"0",
+            "type":"Opening Balance"
+         }
+      ]
+   }
+}
+```
+### Send Money Service
+#### Send within Equity
+```pycon
+send_money_service = SendMoneyService(config=uat_config)
 payload = {
     "source": {
-        "countryCode": "KES",
-        "name": "John Doe",
-        "currency": "KES",
-        "accountNumber": ACCOUNT_NUMBER
+        "countryCode": COUNTRY_CODE,
+        "name": "CATHERINE MURANDITSI MUKABWA",
+        "accountNumber": ACCOUNT_NO
     },
     "destination": {
         "type": "bank",
         "countryCode": "KE",
         "name": "Tom Doe",
-        "bankCode": "01",
         "accountNumber": "0250163591202"
     },
     "transfer": {
-        "type": "RTGS",
+        "type": "InternalFundsTransfer",
         "amount": "1000.00",
         "currencyCode": "KES",
-        "reference": "922651940124",
-        "date": "2022-12-30",
+        "reference": "692494625798",
+        "date": "2023-08-18",
         "description": "some remarks here"
     }
 }
-res = send_money_service.send_rtgs(signature, api_token, **payload)
-print(res)
+ep_signature = auth.signature((ACCOUNT_NO,"1000.00", "KES", "692494625798"))
+send_money_within_equity = send_money.send_within_equity(ep_signature, auth_token, **payload)
+print(send_money_within_equity)
 ```
 ```shell
-$ python script.py
-{"transactionId": "000000403777", "status": "SUCCESS"}
+{
+  "status": true,
+  "code": 0,
+  "message": "success",
+  "data": {
+    "transactionId": "54154",
+    "status": "SUCCESS"
+  }
+}
+```
+#### Send to mobile wallets
+```pycon
+payload = {
+    "source": {
+        "countryCode": "KE",
+        "name": "CATHERINE MURANDITSI MUKABWA",
+        "accountNumber": ACCOUNT_NO
+    },
+    "destination": {
+        "type": "mobile",
+        "countryCode": "KE",
+        "name": "A N.Other",
+        "mobileNumber": "0722123456",
+        "walletName": "Mpesa"
+    },
+    "transfer": {
+        "type": "MobileWallet",
+        "amount": "1000",
+        "currencyCode": "KES",
+        "date": "2023-01-13",
+        "description": "some remarks here"
+    }
+}
+ep_signature = auth.signature(("1000", "KES", "692494625799", ACCOUNT_NO))
+send_money_within_equity = send_money.send_to_mobile_wallets(ep_signature, auth_token, **payload)
+print(send_money_within_equity)
+```
+```shell
+{
+    "status": true,
+    "code": 0,
+    "message": "success",
+    "data": {
+      "transactionId": "",
+      "status": "SUCCESS"
+    }
+}
 ```
